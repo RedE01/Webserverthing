@@ -1,4 +1,5 @@
 require 'sqlite3'
+require 'bcrypt'
 
 class Seeder
 
@@ -50,8 +51,9 @@ class Seeder
             { user_id: 0, title: "also epicly", content: "This is also an epic post if you ask me"}
         ]
 
-        users.each do |user| 
-            db.execute("INSERT INTO users (name, password) VALUES(?,?)", user[:name], user[:password])
+        users.each do |user|
+            hashed = BCrypt::Password.create(user[:password])
+            db.execute("INSERT INTO users (name, password) VALUES(?,?)", user[:name], hashed)
         end
 
         posts.each do |post| 

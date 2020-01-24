@@ -1,1 +1,6 @@
-h1 Hello
+h1 Posts
+hr
+
+- @posts.each do |post|
+    a href="/post/#{post['id']}" #{post['title']}
+    hr

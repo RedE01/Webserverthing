@@ -3,6 +3,12 @@ html
     head
         title Epic
     body
-        -if(session['logged_in'])
+        a href="/" Home
+        -if(session['user_id'])
+            form action="/logout" method="post"
+                input type="submit" value="logout"
+        - else
+            a href="/login" Login
+            a href="/user/new" Register
         == yield
         footer © Epicly
