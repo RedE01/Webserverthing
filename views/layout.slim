@@ -1,0 +1,8 @@
+doctype html
+html
+    head
+        title Epic
+    body
+        -if(session['logged_in'])
+        == yield
+        footer © Epicly
