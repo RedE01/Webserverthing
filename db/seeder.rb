@@ -32,9 +32,10 @@ class Seeder
         db.execute <<-SQL
             CREATE TABLE "posts" (
                 "id"    INTEGER PRIMARY KEY AUTOINCREMENT,
-                "user_id" INTEGER,
+                "user_id" INTEGER NOT NULL,
                 "title"  TEXT NOT NULL,
-                "content" TEXT NOT NULL
+                "content" TEXT NOT NULL,
+                "image_id" INTEGER
             );
         SQL
     end
@@ -47,8 +48,8 @@ class Seeder
         ]
 
         posts = [
-            { user_id: 1, title: "epicly", content: "Hello there is is an epic post if you ask me"},
-            { user_id: 0, title: "also epicly", content: "This is also an epic post if you ask me"}
+            { user_id: 1, title: "epicly", content: "Hello there is is an epic post if you ask me", image_id: nil},
+            { user_id: 0, title: "also epicly", content: "This is also an epic post if you ask me", image_id: nil}
         ]
 
         users.each do |user|
@@ -57,7 +58,7 @@ class Seeder
         end
 
         posts.each do |post| 
-            db.execute("INSERT INTO posts (user_id, title, content) VALUES(?,?,?)", post[:user_id], post[:title], post[:content])
+            db.execute("INSERT INTO posts (user_id, title, content, image_id) VALUES(?,?,?,?)", post[:user_id], post[:title], post[:content], post[:image_id])
         end
     end
 

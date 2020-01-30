@@ -5,3 +5,4 @@ gem 'slim'
 gem 'sqlite3'
 gem 'wdm'
 gem "bcrypt"
+gem "fileutils"
