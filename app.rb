@@ -15,7 +15,7 @@ class App < Sinatra::Base
 	end
 
 	get '/' do
-		@posts = @db.execute("SELECT posts.*, users.name FROM posts INNER JOIN users WHERE posts.user_id = users.id ORDER BY posts.id DESC;")
+		@posts = @db.execute("SELECT posts.*, users.name FROM posts INNER JOIN users ON posts.user_id = users.id WHERE posts.parent_post_id IS NULL ORDER BY posts.id DESC;")
 
 		return slim(:startpage)
 	end
@@ -73,13 +73,26 @@ class App < Sinatra::Base
 			image_id = filename.to_i
 		end
 
-		@db.execute("INSERT INTO posts (user_id, title, content, image_id) VALUES (?, ?, ?, ?);", session['user_id'], params['title'], params['content'], image_id)
+		@db.execute("INSERT INTO posts (user_id, title, content, image_id, parent_post_id) VALUES (?, ?, ?, ?, nil);", session['user_id'], params['title'], params['content'], image_id)
+
+		return redirect('/')
+	end
+
+	post '/post/:base_post_id/:parent_post_id' do
+		if(session['user_id'] == nil)
+			return redirect('/')
+		end
+
+		@db.execute("INSERT INTO posts (user_id, title, content, parent_post_id, base_post_id) VALUES (?, ?, ?, ?, ?);", session['user_id'], params['title'], params['content'], params['parent_post_id'], params['base_post_id'])
+		# current_post_id = @db.execute("SELECT last_insert_rowid();")
+		# @db.execute("INSERT INTO threads")
 
 		return redirect('/')
 	end
 
 	get '/post/:id' do
 		@post = @db.execute("SELECT * FROM posts WHERE id=?;", params['id']).first
+		@comments = @db.execute("SELECT * FROM posts WHERE base_post_id=?;", params['id'])
 		
 		return slim(:"post/view")
 	end

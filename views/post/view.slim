@@ -4,4 +4,11 @@ p #{@post['content']}
 - if(@post['image_id'])
     img src="/posts/images/#{@post['user_id']}/#{@post['image_id']}.png" alt="Epic"
 
+
 hr
+h3 Comments
+hr
+- @comments.each do |comment|
+    p #{comment['title']}
+    hr
+end
