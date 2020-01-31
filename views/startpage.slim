@@ -5,4 +5,6 @@ hr
 
 - @posts.each do |post|
     a href="/post/#{post['id']}" #{post['title']}
+    br
+    a href="/user/#{post['user_id']}" Posted by #{post['name']}
     hr

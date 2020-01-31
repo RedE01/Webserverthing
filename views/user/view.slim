@@ -1,0 +1,6 @@
+h1 #{@username}
+hr
+h3 Posts
+- @userPosts.each do |userPost|
+    a href="/post/#{userPost['id']}" #{userPost['title']}
+    hr

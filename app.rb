@@ -15,7 +15,7 @@ class App < Sinatra::Base
 	end
 
 	get '/' do
-		@posts = @db.execute("SELECT * FROM posts ORDER BY id DESC;")
+		@posts = @db.execute("SELECT posts.*, users.name FROM posts INNER JOIN users WHERE posts.user_id = users.id ORDER BY posts.id DESC;")
 
 		return slim(:startpage)
 	end
@@ -82,5 +82,12 @@ class App < Sinatra::Base
 		@post = @db.execute("SELECT * FROM posts WHERE id=?;", params['id']).first
 		
 		return slim(:"post/view")
+	end
+
+	get '/user/:id' do
+		@username = @db.execute("SELECT name FROM users WHERE id = ?;", params['id'])[0]['name']
+		@userPosts = @db.execute("SELECT * FROM posts WHERE user_id = ?;", params['id'])
+		
+		return slim(:"user/view")
 	end
 end
