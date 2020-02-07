@@ -1,15 +1,33 @@
+class CommentNode
+    attr_accessor :value, :children
+
+    def initialize(values)
+        @values = values
+        @children = []
+    end
+
+    def addChild(value)
+        @children << value
+    end
+
+    def getValues()
+        return @values
+    end
+end
+
 class App < Sinatra::Base
 	
 	enable :sessions
 	
 	before do 
+		session['user_id'] = 1
+
 		@db = SQLite3::Database.new('db/db.db')
 		@db.results_as_hash = true
-		
-		if !@user_id
-			
-			@user_id = session['user_id']
-			
+
+		@userInfo = []
+		if(session['user_id'] != nil)
+			@userInfo = @db.execute("SELECT * FROM users WHERE id = ?;", session['user_id'])[0]
 		end
 		
 	end
@@ -59,7 +77,6 @@ class App < Sinatra::Base
 		if(params[:image])
 			tempFile = params[:image][:tempfile]
 
-			# filename = "#{session['user_id']}-#{time.year}-#{time.month}-#{time.day}-#{time.hour}-#{time.min}-#{time.sec}"
 			dirname = "./public/posts/images/#{session['user_id']}"
 			unless File.directory?(dirname)
 				FileUtils.mkdir_p(dirname)
@@ -73,7 +90,7 @@ class App < Sinatra::Base
 			image_id = filename.to_i
 		end
 
-		@db.execute("INSERT INTO posts (user_id, title, content, image_id, parent_post_id) VALUES (?, ?, ?, ?, nil);", session['user_id'], params['title'], params['content'], image_id)
+		@db.execute("INSERT INTO posts (user_id, title, content, image_id) VALUES (?, ?, ?, ?);", session['user_id'], params['title'], params['content'], image_id)
 
 		return redirect('/')
 	end
@@ -83,7 +100,9 @@ class App < Sinatra::Base
 			return redirect('/')
 		end
 
-		@db.execute("INSERT INTO posts (user_id, title, content, parent_post_id, base_post_id) VALUES (?, ?, ?, ?, ?);", session['user_id'], params['title'], params['content'], params['parent_post_id'], params['base_post_id'])
+		depth = 0
+
+		@db.execute("INSERT INTO posts (user_id, title, content, parent_post_id, base_post_id, depth) VALUES (?, ?, ?, ?, ?, ?);", session['user_id'], params['title'], params['content'], params['parent_post_id'], params['base_post_id'], depth)
 		# current_post_id = @db.execute("SELECT last_insert_rowid();")
 		# @db.execute("INSERT INTO threads")
 
@@ -92,8 +111,24 @@ class App < Sinatra::Base
 
 	get '/post/:id' do
 		@post = @db.execute("SELECT * FROM posts WHERE id=?;", params['id']).first
-		@comments = @db.execute("SELECT * FROM posts WHERE base_post_id=?;", params['id'])
+		comments_list = @db.execute("SELECT posts.*, users.name FROM posts INNER JOIN users ON posts.user_id = users.id WHERE base_post_id=? ORDER BY posts.depth ASC, posts.id DESC;", params['id'])
 		
+		# pp comments_list
+
+		@comments = []
+		comments_hash = Hash.new()
+		comments_list.each do |comment|
+			newComment = CommentNode.new(comment)
+			
+			comments_hash[comment['id']] = newComment
+			parentComment = comments_hash[comment['parent_post_id']]
+			if(parentComment)
+				parentComment.addChild(newComment)
+			else
+				@comments << newComment
+			end
+		end
+
 		return slim(:"post/view")
 	end
 

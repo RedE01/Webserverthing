@@ -1,0 +1,8 @@
+div class="comment"
+    - comments.each do |comment|
+        div class="comment-content"
+            p class="comment" #{comment.getValues()['content']}
+            / a href="/user/#{comment.getUserId()}" class="comment-posted-by" Posted by #{comment.getUserName()}
+        
+        - if(comment.children)
+            == slim :"post/comment", locals: {comments: comment.children } 

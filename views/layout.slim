@@ -2,9 +2,11 @@ doctype html
 html
     head
         title Epic
+        link rel="stylesheet" href="/css/style.css"/
     body
         a href="/" Home
         -if(session['user_id'])
+            h3 Logged in as #{@userInfo['name']}
             form action="/logout" method="post"
                 input type="submit" value="logout"
         - else

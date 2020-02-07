@@ -1,0 +1,17 @@
+form {
+    display: inline;
+}
+
+div.comment {
+    padding-left: 16px;
+    border-left: 1px grey solid;
+}
+
+div.comment-content {
+    padding-bottom: 5px;
+    border-bottom: 1px grey solid;
+}
+
+div.comment-content-more-info {
+    display: none;
+}
