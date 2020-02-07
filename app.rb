@@ -95,18 +95,23 @@ class App < Sinatra::Base
 		return redirect('/')
 	end
 
-	post '/post/:base_post_id/:parent_post_id' do
+	post '/post/:base_post_id/:parent_post_id/:depth' do
 		if(session['user_id'] == nil)
 			return redirect('/')
 		end
 
 		depth = 0
+		if(params['depth'])
+			depth = params['depth']
+		end
 
-		@db.execute("INSERT INTO posts (user_id, title, content, parent_post_id, base_post_id, depth) VALUES (?, ?, ?, ?, ?, ?);", session['user_id'], params['title'], params['content'], params['parent_post_id'], params['base_post_id'], depth)
+		if(params['content'] != "")
+			@db.execute("INSERT INTO posts (user_id, title, content, parent_post_id, base_post_id, depth) VALUES (?, ?, ?, ?, ?, ?);", session['user_id'], params['title'], params['content'], params['parent_post_id'], params['base_post_id'], depth)
+		end
 		# current_post_id = @db.execute("SELECT last_insert_rowid();")
 		# @db.execute("INSERT INTO threads")
 
-		return redirect('/')
+		return redirect(back)
 	end
 
 	get '/post/:id' do

@@ -9,6 +9,10 @@ br
 br
 hr
 h3 Comments
+- if(session['user_id'])
+    form action="/post/#{@post['id']}/#{@post['id']}/#{@post['depth'] + 1}" method="post"
+        input required="" type="text" name="content"
+        button type="submit" Reply
 hr
 div class="Comments"
     == slim :"post/comment", locals: {comments: @comments } 

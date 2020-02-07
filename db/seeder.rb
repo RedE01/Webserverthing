@@ -34,7 +34,7 @@ class Seeder
             CREATE TABLE "posts" (
                 "id"    INTEGER PRIMARY KEY AUTOINCREMENT,
                 "user_id" INTEGER NOT NULL,
-                "title"  TEXT NOT NULL,
+                "title"  TEXT,
                 "content" TEXT NOT NULL,
                 "image_id" INTEGER,
                 "parent_post_id" INTEGER,
@@ -61,9 +61,9 @@ class Seeder
         posts = [
             { user_id: 1, title: "epicly", content: "Hello there is is an epic post if you ask me", image_id: nil, parent_post_id: nil, base_post_id: nil, depth: 0},
             { user_id: 2, title: "also epicly", content: "This is also an epic post if you ask me", image_id: nil, parent_post_id: nil, base_post_id: nil, depth: 0},
-            { user_id: 2, title: "", content: "This is an epic comment if you ask me", image_id: nil, parent_post_id: 1, base_post_id: 1, depth: 1},
-            { user_id: 1, title: "", content: "This is an awesome comment if you ask me", image_id: nil, parent_post_id: 3, base_post_id: 1, depth: 2},
-            { user_id: 2, title: "", content: "Hello", image_id: nil, parent_post_id: 3, base_post_id: 1, depth: 2}
+            { user_id: 2, title: nil, content: "This is an epic comment if you ask me", image_id: nil, parent_post_id: 1, base_post_id: 1, depth: 1},
+            { user_id: 1, title: nil, content: "This is an awesome comment if you ask me", image_id: nil, parent_post_id: 3, base_post_id: 1, depth: 2},
+            { user_id: 2, title: nil, content: "Hello", image_id: nil, parent_post_id: 3, base_post_id: 1, depth: 2}
         ]
 
         users.each do |user|

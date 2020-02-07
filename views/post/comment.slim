@@ -2,7 +2,19 @@ div class="comment"
     - comments.each do |comment|
         div class="comment-content"
             p class="comment" #{comment.getValues()['content']}
-            / a href="/user/#{comment.getUserId()}" class="comment-posted-by" Posted by #{comment.getUserName()}
+            a href="/user/#{comment.getValues()['user_id']}" class="comment-posted-by" Posted by #{comment.getValues()['name']}
+
+            button id="toggleCommentMoreInfo-#{comment.getValues()['id']}" onclick="toggleCommentMoreInfo(#{comment.getValues()['id']})" v
         
+            div class="comment-content-more-info" id="comment-content-more-info-#{comment.getValues()['id']}"
+                - if(session['user_id'])
+                    form action="/post/#{comment.getValues()['base_post_id']}/#{comment.getValues()['id']}/#{comment.getValues()['depth'] + 1}" method="post"
+                        input required="" type="text" name="content"
+                        button type="submit" Reply
+
+                / - if(session['user_id'] == comment.getValues()['user_id'])
+                /     form action="/post/remove/#{comment.getId()}" method="post"
+                /         button type="submit" Remove comment
+
         - if(comment.children)
             == slim :"post/comment", locals: {comments: comment.children } 
