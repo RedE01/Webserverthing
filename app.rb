@@ -38,6 +38,11 @@ class App < Sinatra::Base
 		return slim(:startpage)
 	end
 
+	get '/followingPosts' do
+		@posts = @db.execute("SELECT posts.*, users.name FROM posts INNER JOIN follows ON posts.user_id = follows.followee_id INNER JOIN users ON posts.user_id = users.id  WHERE posts.parent_post_id IS NULL AND follows.follower_id = ?", session['user_id'])
+
+		return slim(:followingPosts)
+	end
 	
 	get '/login' do
 		return slim(:login)
@@ -126,8 +131,6 @@ class App < Sinatra::Base
 		if(params['content'] != "")
 			@db.execute("INSERT INTO posts (user_id, title, content, parent_post_id, base_post_id, depth) VALUES (?, ?, ?, ?, ?, ?);", session['user_id'], params['title'], params['content'], params['parent_post_id'], params['base_post_id'], depth)
 		end
-		# current_post_id = @db.execute("SELECT last_insert_rowid();")
-		# @db.execute("INSERT INTO threads")
 
 		return redirect(back)
 	end
@@ -135,8 +138,6 @@ class App < Sinatra::Base
 	get '/post/:id' do
 		@post = @db.execute("SELECT * FROM posts WHERE id=?;", params['id']).first
 		comments_list = @db.execute("SELECT posts.*, users.name FROM posts INNER JOIN users ON posts.user_id = users.id WHERE base_post_id=? ORDER BY posts.depth ASC, posts.id DESC;", params['id'])
-		
-		# pp comments_list
 
 		@comments = []
 		comments_hash = Hash.new()

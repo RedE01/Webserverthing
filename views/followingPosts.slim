@@ -1,9 +1,9 @@
 hr
 - if(session['user_id'])
-    a href="/followingPosts" Follows
+    a href="/" All
     hr
     a href="/post/new" CreatePost
-h1 All Posts
+h1 Follows Posts
 hr
 
 - @posts.each do |post|
