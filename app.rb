@@ -64,6 +64,24 @@ class App < Sinatra::Base
 		return redirect('/')
 	end
 
+	get '/user/new' do
+		return slim(:"user/new")
+	end
+
+	post '/user/new' do
+		user = @db.execute("SELECT id FROM users WHERE name IS ?;", params['username'])[0]
+		if(user != nil)
+			return redirect('/user/new')
+		end
+
+		hashedPassword = BCrypt::Password.create(params['password'])
+		@db.execute("INSERT INTO users(name, password) VALUES (?, ?);", params['username'], hashedPassword)
+		
+		#Login and stuff
+
+		return redirect('/')
+	end
+
 	get '/post/new' do
 		return slim(:"post/new")
 	end
@@ -90,7 +108,7 @@ class App < Sinatra::Base
 			image_id = filename.to_i
 		end
 
-		@db.execute("INSERT INTO posts (user_id, title, content, image_id) VALUES (?, ?, ?, ?);", session['user_id'], params['title'], params['content'], image_id)
+		@db.execute("INSERT INTO posts (user_id, title, content, image_id, depth) VALUES (?, ?, ?, ?, 0);", session['user_id'], params['title'], params['content'], image_id)
 
 		return redirect('/')
 	end
