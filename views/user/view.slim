@@ -5,5 +5,5 @@ h3 Posts
     - if(userPost['depth'] == 0)
         a href="/post/#{userPost['id']}" Post: #{userPost['title']}
     - else
-        a href="/post/#{userPost['id']}" Comment: #{userPost['content']}
+        a href="/post/#{userPost['base_post_id']}" Comment: #{userPost['content']} | On Post: #{userPost['basePostTitle']}
     hr

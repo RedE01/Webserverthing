@@ -1,3 +1,6 @@
+require_relative("model/Db.rb")
+require_relative("model/User.rb")
+
 class CommentNode
     attr_accessor :value, :children
 
@@ -20,13 +23,13 @@ class App < Sinatra::Base
 	enable :sessions
 	
 	before do 
-		session['user_id'] = 1
+		# session['user_id'] = 1
 
-		@db = SQLite3::Database.new('db/db.db')
-		@db.results_as_hash = true
+		@db = Db.get()
 
 		@userInfo = []
 		if(session['user_id'] != nil)
+
 			@userInfo = @db.execute("SELECT * FROM users WHERE id = ?;", session['user_id'])[0]
 		end
 		
@@ -49,15 +52,16 @@ class App < Sinatra::Base
 	end
 	
 	post '/login' do
-		user = @db.execute("SELECT id, password FROM users WHERE name IS ?;", params['username']).first
+		# user = @db.execute("SELECT id, password FROM users WHERE name IS ?;", params['username']).first
+		user = User.find_by(name: params['username'])
 		if(user == nil)
 			return redirect('/login')
 		end
 		
-		db_hash = BCrypt::Password.new(user['password'])
+		db_hash = BCrypt::Password.new(user.password)
 
 		if(db_hash == params['password'])
-			session['user_id'] = user['id']
+			session['user_id'] = user.id
 			return redirect('/')
 		end
 		
@@ -136,7 +140,7 @@ class App < Sinatra::Base
 	end
 
 	get '/post/:id' do
-		@post = @db.execute("SELECT * FROM posts WHERE id=?;", params['id']).first
+		@post = @db.execute("SELECT posts.*, users.name AS username FROM posts INNER JOIN users ON posts.user_id = users.id WHERE posts.id=?;", params['id']).first
 		comments_list = @db.execute("SELECT posts.*, users.name FROM posts INNER JOIN users ON posts.user_id = users.id WHERE base_post_id=? ORDER BY posts.depth ASC, posts.id DESC;", params['id'])
 
 		@comments = []
@@ -158,8 +162,8 @@ class App < Sinatra::Base
 
 	get '/user/:id' do
 		@username = @db.execute("SELECT name FROM users WHERE id = ?;", params['id'])[0]['name']
-		@userPosts = @db.execute("SELECT * FROM posts WHERE user_id = ?;", params['id'])
-		
+		@userPosts = @db.execute("SELECT post.*, basePost.title AS basePostTitle FROM posts AS post LEFT JOIN posts AS basePost ON post.base_post_id = basePost.id WHERE post.user_id = ?;", params['id'])
+
 		return slim(:"user/view")
 	end
 end
