@@ -1,5 +1,6 @@
 require_relative("model/Db.rb")
 require_relative("model/User.rb")
+require_relative("model/Post.rb")
 
 class CommentNode
     attr_accessor :value, :children
@@ -36,7 +37,7 @@ class App < Sinatra::Base
 	end
 
 	get '/' do
-		@posts = @db.execute("SELECT posts.*, users.name FROM posts INNER JOIN users ON posts.user_id = users.id WHERE posts.parent_post_id IS NULL ORDER BY posts.id DESC;")
+		@posts = Post.find_by(parent_post_id: "NULL", order: "DESC")
 
 		return slim(:startpage)
 	end
@@ -52,8 +53,8 @@ class App < Sinatra::Base
 	end
 	
 	post '/login' do
-		# user = @db.execute("SELECT id, password FROM users WHERE name IS ?;", params['username']).first
-		user = User.find_by(name: params['username'])
+		user = User.find_by(name: params['username'])[0]
+
 		if(user == nil)
 			return redirect('/login')
 		end
@@ -78,13 +79,13 @@ class App < Sinatra::Base
 	end
 
 	post '/user/new' do
-		user = @db.execute("SELECT id FROM users WHERE name IS ?;", params['username'])[0]
+		user = User.find_by(name: params['username'])
+
 		if(user != nil)
 			return redirect('/user/new')
 		end
 
-		hashedPassword = BCrypt::Password.create(params['password'])
-		@db.execute("INSERT INTO users(name, password) VALUES (?, ?);", params['username'], hashedPassword)
+		User.insert(params['username'], params['password'])
 		
 		#Login and stuff
 

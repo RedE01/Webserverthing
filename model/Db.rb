@@ -4,4 +4,8 @@ class Db
         @db.results_as_hash = true
         return @db
     end
+
+    def self.sanitize(str)
+        return SQLite3::Database.quote(str)
+    end
 end

@@ -7,7 +7,7 @@ h1 All Posts
 hr
 
 - @posts.each do |post|
-    a href="/post/#{post['id']}" #{post['title']}
+    a href="/post/#{post.id}" #{post.title}
     br
-    a href="/user/#{post['user_id']}" Posted by #{post['name']}
+    a href="/user/#{post.user_id}" Posted by #{post.user_name}
     hr
