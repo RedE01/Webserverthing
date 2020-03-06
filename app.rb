@@ -1,21 +1,18 @@
 require_relative("model/Db.rb")
 require_relative("model/User.rb")
 require_relative("model/Post.rb")
+require_relative("./misc.rb")
 
 class CommentNode
-    attr_accessor :value, :children
+    attr_reader :post, :children
 
-    def initialize(values)
-        @values = values
+    def initialize(post)
+        @post = post
         @children = []
     end
 
-    def addChild(value)
-        @children << value
-    end
-
-    def getValues()
-        return @values
+    def addChild(commen_node)
+        @children << commen_node
     end
 end
 
@@ -36,7 +33,8 @@ class App < Sinatra::Base
 	end
 
 	get '/' do
-		@posts = Post.find_by(parent_post_id: "NULL", order: "DESC")
+		@posts = Post.find_by(parent_post_id: "NULL", order: [Pair.new("posts.id", "DESC")])
+		Post.find_by()
 
 		return slim(:startpage)
 	end
@@ -140,20 +138,21 @@ class App < Sinatra::Base
 	end
 
 	get '/post/:id' do
-		@post = @db.execute("SELECT posts.*, users.name AS username FROM posts INNER JOIN users ON posts.user_id = users.id WHERE posts.id=?;", params['id']).first
-		comments_list = @db.execute("SELECT posts.*, users.name FROM posts INNER JOIN users ON posts.user_id = users.id WHERE base_post_id=? ORDER BY posts.depth ASC, posts.id DESC;", params['id'])
+		@post = Post.find_by(id: params['id'])[0]
+		comments_list = Post.find_by(base_post_id: params['id'], order: [Pair.new("posts.depth", "ASC"), Pair.new("posts.id", "DESC")])
+		# comments_list = @db.execute("SELECT posts.*, users.name FROM posts INNER JOIN users ON posts.user_id = users.id WHERE base_post_id=? ORDER BY posts.depth ASC, posts.id DESC;", params['id'])
 
 		@comments = []
 		comments_hash = Hash.new()
 		comments_list.each do |comment|
-			newComment = CommentNode.new(comment)
+			newCommentNode = CommentNode.new(comment)
 			
-			comments_hash[comment['id']] = newComment
-			parentComment = comments_hash[comment['parent_post_id']]
-			if(parentComment)
-				parentComment.addChild(newComment)
+			comments_hash[comment.id] = newCommentNode
+			parentCommentNode = comments_hash[comment.parent_post_id]
+			if(parentCommentNode)
+				parentCommentNode.addChild(newCommentNode)
 			else
-				@comments << newComment
+				@comments << newCommentNode
 			end
 		end
 

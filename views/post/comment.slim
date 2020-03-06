@@ -1,14 +1,14 @@
 div class="comment"
     - comments.each do |comment|
         div class="comment-content"
-            p class="comment" #{comment.getValues()['content']}
-            a href="/user/#{comment.getValues()['user_id']}" class="comment-posted-by" Posted by #{comment.getValues()['name']}
+            p class="comment" #{comment.post.content}
+            a href="/user/#{comment.post.user_id}" class="comment-posted-by" Posted by #{comment.post.user_name}
 
-            button id="toggleCommentMoreInfo-#{comment.getValues()['id']}" onclick="toggleCommentMoreInfo(#{comment.getValues()['id']})" v
+            button id="toggleCommentMoreInfo-#{comment.post.id}" onclick="toggleCommentMoreInfo(#{comment.post.id})" v
         
-            div class="comment-content-more-info" id="comment-content-more-info-#{comment.getValues()['id']}"
+            div class="comment-content-more-info" id="comment-content-more-info-#{comment.post.id}"
                 - if(session['user_id'])
-                    form action="/post/#{comment.getValues()['base_post_id']}/#{comment.getValues()['id']}/#{comment.getValues()['depth'] + 1}" method="post"
+                    form action="/post/#{comment.post.base_post_id}/#{comment.post.id}/#{comment.post.depth + 1}" method="post"
                         input required="" type="text" name="content"
                         button type="submit" Reply
 

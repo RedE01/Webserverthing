@@ -1,9 +1,9 @@
-h1 #{@post['title']}
-a href="/user/#{@post['user_id']}" Posted by #{@post['username']}
+h1 #{@post.title}
+a href="/user/#{@post.user_id}" Posted by #{@post.user_name}
 hr
-p #{@post['content']}
-- if(@post['image_name'])
-    img src="/posts/images/#{@post['user_id']}/#{@post['image_name']}" alt="#{@post['image_name']}"
+p #{@post.content}
+- if(@post.image_name)
+    img src="/posts/images/#{@post.user_id}/#{@post.image_name}" alt="#{@post.image_name}"
 
 
 br
@@ -11,7 +11,7 @@ br
 hr
 h3 Comments
 - if(session['user_id'])
-    form action="/post/#{@post['id']}/#{@post['id']}/#{@post['depth'] + 1}" method="post"
+    form action="/post/#{@post.id}/#{@post.id}/#{@post.depth + 1}" method="post"
         input required="" type="text" name="content"
         button type="submit" Reply
 hr

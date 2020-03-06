@@ -37,12 +37,21 @@ class Model
     end
 
     protected
-    def self.createOrderString(collumn, order)
-        if(order == nil)
+    def self.createOrderString(order_pair_list)
+        if(order_pair_list == nil)
             return ""
         end
 
-        return " ORDER BY #{collumn} #{order}"
+        result = ""
+        appendString = " ORDER BY "
+        order_pair_list.each_with_index do |order_pair, index|
+            result += appendString + "#{order_pair.var1} #{order_pair.var2}"
+            if(index == 0)
+                appendString = ", "
+            end
+        end
+
+        return result
     end
 
 end
