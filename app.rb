@@ -24,14 +24,13 @@ class App < Sinatra::Base
 	enable :sessions
 	
 	before do 
-		# session['user_id'] = 1
+		session['user_id'] = 1
 
 		@db = Db.get()
 
-		@userInfo = []
+		@userInfo = nil
 		if(session['user_id'] != nil)
-
-			@userInfo = @db.execute("SELECT * FROM users WHERE id = ?;", session['user_id'])[0]
+			@userInfo = User.find_by(id: session['user_id'])[0]
 		end
 		
 	end
@@ -101,7 +100,7 @@ class App < Sinatra::Base
 			return redirect('/')
 		end
 		
-		image_id = nil
+		image_name = nil
 		if(params[:image])
 			tempFile = params[:image][:tempfile]
 
@@ -115,10 +114,10 @@ class App < Sinatra::Base
 			fileExtension = File.extname(filename)
 			FileUtils.cp(tempFile, "#{dirname}/#{filesInDir.to_s}#{fileExtension}")
 
-			image_id = filename.to_i
+			image_name = filesInDir.to_s + fileExtension
 		end
 
-		@db.execute("INSERT INTO posts (user_id, title, content, image_id, depth) VALUES (?, ?, ?, ?, 0);", session['user_id'], params['title'], params['content'], image_id)
+		Post.insert(session['user_id'], params['title'], params['content'], image_name, nil, nil, 0)
 
 		return redirect('/')
 	end
@@ -134,7 +133,7 @@ class App < Sinatra::Base
 		end
 
 		if(params['content'] != "")
-			@db.execute("INSERT INTO posts (user_id, title, content, parent_post_id, base_post_id, depth) VALUES (?, ?, ?, ?, ?, ?);", session['user_id'], params['title'], params['content'], params['parent_post_id'], params['base_post_id'], depth)
+			Post.insert(session['user_id'], params['title'], params['content'], nil, params['parent_post_id'], params['base_post_id'], depth)
 		end
 
 		return redirect(back)

@@ -2,8 +2,8 @@ h1 #{@post['title']}
 a href="/user/#{@post['user_id']}" Posted by #{@post['username']}
 hr
 p #{@post['content']}
-- if(@post['image_id'])
-    img src="/posts/images/#{@post['user_id']}/#{@post['image_id']}.png" alt="Epic"
+- if(@post['image_name'])
+    img src="/posts/images/#{@post['user_id']}/#{@post['image_name']}" alt="#{@post['image_name']}"
 
 
 br

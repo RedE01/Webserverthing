@@ -37,7 +37,7 @@ class Seeder
                 "user_id" INTEGER NOT NULL,
                 "title"  TEXT,
                 "content" TEXT NOT NULL,
-                "image_id" INTEGER,
+                "image_name" TEXT,
                 "parent_post_id" INTEGER,
                 "base_post_id" INTEGER,
                 "depth" INTEGER NOT NULL
@@ -67,11 +67,11 @@ class Seeder
         ]
 
         posts = [
-            { user_id: 1, title: "epicly", content: "Hello there is is an epic post if you ask me", image_id: nil, parent_post_id: nil, base_post_id: nil, depth: 0},
-            { user_id: 2, title: "also epicly", content: "This is also an epic post if you ask me", image_id: nil, parent_post_id: nil, base_post_id: nil, depth: 0},
-            { user_id: 2, title: nil, content: "This is an epic comment if you ask me", image_id: nil, parent_post_id: 1, base_post_id: 1, depth: 1},
-            { user_id: 1, title: nil, content: "This is an awesome comment if you ask me", image_id: nil, parent_post_id: 3, base_post_id: 1, depth: 2},
-            { user_id: 2, title: nil, content: "Hello", image_id: nil, parent_post_id: 3, base_post_id: 1, depth: 2}
+            { user_id: 1, title: "epicly", content: "Hello there is is an epic post if you ask me", image_name: nil, parent_post_id: nil, base_post_id: nil, depth: 0},
+            { user_id: 2, title: "also epicly", content: "This is also an epic post if you ask me", image_name: nil, parent_post_id: nil, base_post_id: nil, depth: 0},
+            { user_id: 2, title: nil, content: "This is an epic comment if you ask me", image_name: nil, parent_post_id: 1, base_post_id: 1, depth: 1},
+            { user_id: 1, title: nil, content: "This is an awesome comment if you ask me", image_name: nil, parent_post_id: 3, base_post_id: 1, depth: 2},
+            { user_id: 2, title: nil, content: "Hello", image_name: nil, parent_post_id: 3, base_post_id: 1, depth: 2}
         ]
 
         follows = [
@@ -84,7 +84,7 @@ class Seeder
         end
 
         posts.each do |post| 
-            db.execute("INSERT INTO posts (user_id, title, content, image_id, parent_post_id, base_post_id, depth) VALUES(?,?,?,?,?,?,?)", post[:user_id], post[:title], post[:content], post[:image_id], post[:parent_post_id], post[:base_post_id], post[:depth])
+            db.execute("INSERT INTO posts (user_id, title, content, image_name, parent_post_id, base_post_id, depth) VALUES(?,?,?,?,?,?,?)", post[:user_id], post[:title], post[:content], post[:image_name], post[:parent_post_id], post[:base_post_id], post[:depth])
         end
 
         follows.each do |follow| 
