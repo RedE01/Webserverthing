@@ -23,7 +23,7 @@ class User < Model
     def self.insert(name, password)
         db = Db.get()
 
-        hashedPassword = BCrypt::Password.create('password')
+        hashedPassword = BCrypt::Password.create(password)
 		db.execute("INSERT INTO users(name, password) VALUES (?, ?);", name, hashedPassword)
     end
 

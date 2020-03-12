@@ -21,7 +21,7 @@ class App < Sinatra::Base
 	enable :sessions
 	
 	before do 
-		session['user_id'] = 1
+		# session['user_id'] = 1
 
 		@db = Db.get()
 
@@ -76,17 +76,21 @@ class App < Sinatra::Base
 	end
 
 	post '/user/new' do
-		user = User.find_by(name: params['username'])
-
-		if(user != nil)
+		if(params['password'] != params['passwordConfirm'])
 			return redirect('/user/new')
 		end
 
+		user = User.find_by(name: params['username'])[0]
+		
+		if(user != nil)
+			return redirect('/user/new')
+		end
+		
 		User.insert(params['username'], params['password'])
 		
 		#Login and stuff
 
-		return redirect('/')
+		return redirect('/login')
 	end
 
 	get '/post/new' do
