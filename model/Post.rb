@@ -27,7 +27,7 @@ class Post < Model
             queryString += " INNER JOIN follows ON posts.user_id = follows.followee_id"
         end
 
-        return find_impl(queryString, id: id, user_id: user_id, title: title, content: content, image_name: image_name, parent_post_id: parent_post_id, base_post_id: base_post_id, depth: depth, order: order, follower_id: follower_id)
+        return find_impl(queryString, id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, order, follower_id)
     end
 
     def self.insert(user_id, title, content, image_name, parent_post_id, base_post_id, depth)
@@ -37,7 +37,7 @@ class Post < Model
     end
 
     private
-    def self.find_impl(queryStr, id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil)
+    def self.find_impl(queryStr, id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, order, follower_id)
         search_strings = getSearchStrings(id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, follower_id)
         
         queryString = queryStr
