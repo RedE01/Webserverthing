@@ -39,7 +39,7 @@ class App < Sinatra::Base
 	end
 
 	get '/followingPosts' do
-		@posts = @db.execute("SELECT posts.*, users.name FROM posts INNER JOIN follows ON posts.user_id = follows.followee_id INNER JOIN users ON posts.user_id = users.id  WHERE posts.parent_post_id IS NULL AND follows.follower_id = ?", session['user_id'])
+		@posts = Post.find_by(parent_post_id: "NULL", follower_id: session['user_id'])
 
 		return slim(:followingPosts)
 	end

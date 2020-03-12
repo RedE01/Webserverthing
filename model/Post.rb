@@ -18,12 +18,16 @@ class Post < Model
         @base_post_title = base_post_title
     end
 
-    def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil)
-        # queryString = "SELECT posts.*, users.name FROM posts INNER JOIN users ON posts.user_id = users.id"
+    def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil)
         queryString = "SELECT posts.*, users.name, basePost.title AS basePostTitle 
             FROM posts INNER JOIN users ON posts.user_id = users.id
             LEFT JOIN posts AS basePost ON posts.base_post_id = basePost.id"
-        return find_impl(queryString, id: id, user_id: user_id, title: title, content: content, image_name: image_name, parent_post_id: parent_post_id, base_post_id: base_post_id, depth: depth, order: order)
+
+        if(follower_id != nil)
+            queryString += " INNER JOIN follows ON posts.user_id = follows.followee_id"
+        end
+
+        return find_impl(queryString, id: id, user_id: user_id, title: title, content: content, image_name: image_name, parent_post_id: parent_post_id, base_post_id: base_post_id, depth: depth, order: order, follower_id: follower_id)
     end
 
     def self.insert(user_id, title, content, image_name, parent_post_id, base_post_id, depth)
@@ -33,8 +37,8 @@ class Post < Model
     end
 
     private
-    def self.find_impl(queryStr, id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil)
-        search_strings = getSearchStrings(id, user_id, title, content, image_name, parent_post_id, base_post_id, depth)
+    def self.find_impl(queryStr, id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil)
+        search_strings = getSearchStrings(id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, follower_id)
         
         queryString = queryStr
         queryString += createSearchString(search_strings)
@@ -43,7 +47,7 @@ class Post < Model
         return makeObjectArray(queryString)
     end
 
-    def self.getSearchStrings(id, user_id, title, content, image_id, parent_post_id, base_post_id, depth)
+    def self.getSearchStrings(id, user_id, title, content, image_id, parent_post_id, base_post_id, depth, follower_id)
         search_strings = []
 
         Post.addStringToQuery("posts.id", id, search_strings)
@@ -54,6 +58,7 @@ class Post < Model
         Post.addStringToQuery("posts.parent_post_id", parent_post_id, search_strings)
         Post.addStringToQuery("posts.base_post_id", base_post_id, search_strings)
         Post.addStringToQuery("posts.depth", depth, search_strings)
+        Post.addStringToQuery("follows.follower_id", follower_id, search_strings)
 
         return search_strings
     end
