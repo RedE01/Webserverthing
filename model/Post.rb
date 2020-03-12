@@ -1,6 +1,19 @@
 require_relative("Db.rb")
 require_relative("Model.rb")
 
+class CommentNode
+    attr_reader :post, :children
+
+    def initialize(post)
+        @post = post
+        @children = []
+    end
+
+    def addChild(commen_node)
+        @children << commen_node
+    end
+end
+
 class Post < Model
 
     attr_reader :id, :user_id, :title, :content, :image_name, :parent_post_id, :base_post_id, :depth, :user_name, :base_post_title

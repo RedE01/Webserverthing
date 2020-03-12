@@ -3,19 +3,6 @@ require_relative("model/User.rb")
 require_relative("model/Post.rb")
 require_relative("./misc.rb")
 
-class CommentNode
-    attr_reader :post, :children
-
-    def initialize(post)
-        @post = post
-        @children = []
-    end
-
-    def addChild(commen_node)
-        @children << commen_node
-    end
-end
-
 class App < Sinatra::Base
 	
 	enable :sessions
