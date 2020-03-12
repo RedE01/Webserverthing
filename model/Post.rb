@@ -84,7 +84,7 @@ class Post < Model
         return_array = []
 
         posts_db.each do |data|
-            return_array << Post.new(data['id'], data['user_id'], data['title'], data['content'], data['image_id'], data['parent_post_id'], data['base_post_id'], data['depth'], data['name'], data['basePostTitle'])
+            return_array << Post.new(data['id'], data['user_id'], data['title'], data['content'], data['image_name'], data['parent_post_id'], data['base_post_id'], data['depth'], data['name'], data['basePostTitle'])
         end
 
         return return_array
