@@ -15,3 +15,7 @@ div.comment-content {
 div.comment-content-more-info {
     display: none;
 }
+
+img {
+    width: 100%;
+}
