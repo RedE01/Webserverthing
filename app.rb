@@ -34,7 +34,6 @@ class App < Sinatra::Base
 
 	get '/' do
 		@posts = Post.find_by(parent_post_id: "NULL", order: [Pair.new("posts.id", "DESC")])
-		Post.find_by()
 
 		return slim(:startpage)
 	end
@@ -144,7 +143,6 @@ class App < Sinatra::Base
 	get '/post/:id' do
 		@post = Post.find_by(id: params['id'])[0]
 		comments_list = Post.find_by(base_post_id: params['id'], order: [Pair.new("posts.depth", "ASC"), Pair.new("posts.id", "DESC")])
-		# comments_list = @db.execute("SELECT posts.*, users.name FROM posts INNER JOIN users ON posts.user_id = users.id WHERE base_post_id=? ORDER BY posts.depth ASC, posts.id DESC;", params['id'])
 
 		@comments = []
 		comments_hash = Hash.new()
@@ -164,8 +162,8 @@ class App < Sinatra::Base
 	end
 
 	get '/user/:id' do
-		@username = @db.execute("SELECT name FROM users WHERE id = ?;", params['id'])[0]['name']
-		@userPosts = @db.execute("SELECT post.*, basePost.title AS basePostTitle FROM posts AS post LEFT JOIN posts AS basePost ON post.base_post_id = basePost.id WHERE post.user_id = ?;", params['id'])
+		@user = User.find_by(id: params['id'])[0]
+		@userPosts = Post.find_by(user_id: params['id'])
 
 		return slim(:"user/view")
 	end

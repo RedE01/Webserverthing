@@ -1,9 +1,9 @@
-h1 #{@username}
+h1 #{@user.name}
 hr
 h3 Posts
 - @userPosts.each do |userPost|
-    - if(userPost['depth'] == 0)
-        a href="/post/#{userPost['id']}" Post: #{userPost['title']}
+    - if(userPost.depth == 0)
+        a href="/post/#{userPost.id}" Post: #{userPost.title}
     - else
-        a href="/post/#{userPost['base_post_id']}" Comment: #{userPost['content']} | On Post: #{userPost['basePostTitle']}
+        a href="/post/#{userPost.base_post_id}" Comment: #{userPost.content} | On Post: #{userPost.base_post_title}
     hr

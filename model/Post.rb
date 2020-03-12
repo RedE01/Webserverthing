@@ -3,9 +3,9 @@ require_relative("Model.rb")
 
 class Post < Model
 
-    attr_reader :id, :user_id, :title, :content, :image_name, :parent_post_id, :base_post_id, :depth, :user_name
+    attr_reader :id, :user_id, :title, :content, :image_name, :parent_post_id, :base_post_id, :depth, :user_name, :base_post_title
 
-    def initialize(id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, user_name)
+    def initialize(id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, user_name, base_post_title)
         @id = id
         @user_id = user_id
         @title = title
@@ -15,10 +15,14 @@ class Post < Model
         @base_post_id = base_post_id
         @depth = depth
         @user_name = user_name
+        @base_post_title = base_post_title
     end
 
     def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil)
-        queryString = "SELECT posts.*, users.name FROM posts INNER JOIN users ON posts.user_id = users.id"
+        # queryString = "SELECT posts.*, users.name FROM posts INNER JOIN users ON posts.user_id = users.id"
+        queryString = "SELECT posts.*, users.name, basePost.title AS basePostTitle 
+            FROM posts INNER JOIN users ON posts.user_id = users.id
+            LEFT JOIN posts AS basePost ON posts.base_post_id = basePost.id"
         return find_impl(queryString, id: id, user_id: user_id, title: title, content: content, image_name: image_name, parent_post_id: parent_post_id, base_post_id: base_post_id, depth: depth, order: order)
     end
 
@@ -62,7 +66,7 @@ class Post < Model
         return_array = []
 
         posts_db.each do |data|
-            return_array << Post.new(data['id'], data['user_id'], data['title'], data['content'], data['image_id'], data['parent_post_id'], data['base_post_id'], data['depth'], data['name'])
+            return_array << Post.new(data['id'], data['user_id'], data['title'], data['content'], data['image_id'], data['parent_post_id'], data['base_post_id'], data['depth'], data['name'], data['basePostTitle'])
         end
 
         return return_array
