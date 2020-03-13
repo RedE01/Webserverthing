@@ -1,5 +1,5 @@
 h1 #{@post.title}
-a href="/user/#{@post.user_id}" Posted by #{@post.user_name}
+a href="/user/#{@post.user_id}" Posted by #{@post.user_name} | #{getTimeElapsedStr(@post.date)}
 hr
 p #{@post.content}
 - if(@post.image_name)

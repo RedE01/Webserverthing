@@ -27,7 +27,8 @@ class Seeder
             CREATE TABLE "users" (
                 "id"    INTEGER PRIMARY KEY AUTOINCREMENT,
                 "name"  TEXT NOT NULL,
-                "password" TEXT NOT NULL
+                "password" TEXT NOT NULL,
+                "date" INTEGER NOT NULL
             );
         SQL
 
@@ -40,14 +41,16 @@ class Seeder
                 "image_name" TEXT,
                 "parent_post_id" INTEGER,
                 "base_post_id" INTEGER,
-                "depth" INTEGER NOT NULL
+                "depth" INTEGER NOT NULL,
+                "date" INTEGER NOT NULL
             );
         SQL
 
         db.execute <<-SQL
             CREATE TABLE "follows" (
                 "follower_id" INTEGER NOT NULL,
-                "followee_id" INTEGER NOT NULL
+                "followee_id" INTEGER NOT NULL,
+                "date" INTEGER NOT NULL
             );
         SQL
 
@@ -80,15 +83,15 @@ class Seeder
 
         users.each do |user|
             hashed = BCrypt::Password.create(user[:password])
-            db.execute("INSERT INTO users (name, password) VALUES(?,?)", user[:name], hashed)
+            db.execute("INSERT INTO users (name, password, date) VALUES(?,?,?)", user[:name], hashed, Time.now.to_i)
         end
 
         posts.each do |post| 
-            db.execute("INSERT INTO posts (user_id, title, content, image_name, parent_post_id, base_post_id, depth) VALUES(?,?,?,?,?,?,?)", post[:user_id], post[:title], post[:content], post[:image_name], post[:parent_post_id], post[:base_post_id], post[:depth])
+            db.execute("INSERT INTO posts (user_id, title, content, image_name, parent_post_id, base_post_id, depth, date) VALUES(?,?,?,?,?,?,?,?)", post[:user_id], post[:title], post[:content], post[:image_name], post[:parent_post_id], post[:base_post_id], post[:depth], Time.now.to_i)
         end
 
         follows.each do |follow| 
-            db.execute("INSERT INTO follows (follower_id, followee_id) VALUES(?, ?);", follow[:follower_id], follow[:followee_id])
+            db.execute("INSERT INTO follows (follower_id, followee_id, date) VALUES(?, ?, ?);", follow[:follower_id], follow[:followee_id], Time.now.to_i)
         end
     end
 

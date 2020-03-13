@@ -24,7 +24,7 @@ class User < Model
         db = Db.get()
 
         hashedPassword = BCrypt::Password.create(password)
-		db.execute("INSERT INTO users(name, password) VALUES (?, ?);", name, hashedPassword)
+		db.execute("INSERT INTO users(name, password, date) VALUES (?, ?, ?);", name, hashedPassword, Time.now().to_i())
     end
 
     private 

@@ -16,9 +16,9 @@ end
 
 class Post < Model
 
-    attr_reader :id, :user_id, :title, :content, :image_name, :parent_post_id, :base_post_id, :depth, :user_name, :base_post_title
+    attr_reader :id, :user_id, :title, :content, :image_name, :parent_post_id, :base_post_id, :depth, :user_name, :base_post_title, :date
 
-    def initialize(id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, user_name, base_post_title)
+    def initialize(id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, user_name, base_post_title, date)
         @id = id
         @user_id = user_id
         @title = title
@@ -29,6 +29,7 @@ class Post < Model
         @depth = depth
         @user_name = user_name
         @base_post_title = base_post_title
+        @date = date
     end
 
     def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil)
@@ -46,7 +47,7 @@ class Post < Model
     def self.insert(user_id, title, content, image_name, parent_post_id, base_post_id, depth)
         db = Db.get()
 
-		db.execute("INSERT INTO posts (user_id, title, content, image_name, parent_post_id, base_post_id, depth) VALUES (?, ?, ?, ?, ?, ?, ?);", user_id, title, content, image_name, parent_post_id, base_post_id, depth)
+		db.execute("INSERT INTO posts (user_id, title, content, image_name, parent_post_id, base_post_id, depth, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?);", user_id, title, content, image_name, parent_post_id, base_post_id, depth, Time.now().to_i())
     end
 
     private
@@ -82,9 +83,10 @@ class Post < Model
         posts_db = db.execute(queryString)
 
         return_array = []
-
+        
         posts_db.each do |data|
-            return_array << Post.new(data['id'], data['user_id'], data['title'], data['content'], data['image_name'], data['parent_post_id'], data['base_post_id'], data['depth'], data['name'], data['basePostTitle'])
+            creationDate = Time.at(data['date'].to_i()).to_datetime()
+            return_array << Post.new(data['id'], data['user_id'], data['title'], data['content'], data['image_name'], data['parent_post_id'], data['base_post_id'], data['depth'], data['name'], data['basePostTitle'], creationDate)
         end
 
         return return_array
