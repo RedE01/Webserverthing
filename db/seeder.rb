@@ -18,7 +18,7 @@ class Seeder
         db.execute('DROP TABLE IF EXISTS users;')
         db.execute('DROP TABLE IF EXISTS posts;')
         db.execute('DROP TABLE IF EXISTS follows;')
-        db.execute('DROP TABLE IF EXISTS threads;')
+        db.execute('DROP TABLE IF EXISTS ratings;')
     end
 
     def self.create_tables(db)
@@ -55,9 +55,10 @@ class Seeder
         SQL
 
         db.execute <<-SQL
-            CREATE TABLE "threads" (
-                "parent_post_id" INTEGER NOT NULL,
-                "child_post_id" INTEGER NOT NULL
+            CREATE TABLE "ratings" (
+                "post_id" INTEGER NOT NULL,
+                "user_id" INTEGER NOT NULL,
+                "rating" INTEGER NOT NULL
             );
         SQL
     end
@@ -81,6 +82,11 @@ class Seeder
             { follower_id: 2, followee_id: 1 }
         ]
 
+        ratings = [
+            { post_id: 2, user_id: 1, rating: 1 },
+            { post_id: 3, user_id: 1, rating: -1 }
+        ]
+
         users.each do |user|
             hashed = BCrypt::Password.create(user[:password])
             db.execute("INSERT INTO users (name, password, date) VALUES(?,?,?)", user[:name], hashed, Time.now.to_i)
@@ -92,6 +98,10 @@ class Seeder
 
         follows.each do |follow| 
             db.execute("INSERT INTO follows (follower_id, followee_id, date) VALUES(?, ?, ?);", follow[:follower_id], follow[:followee_id], Time.now.to_i)
+        end
+
+        ratings.each do |rating|
+            db.execute("INSERT INTO ratings VALUES(?, ?, ?);", rating[:post_id], rating[:user_id], rating[:rating])
         end
     end
 

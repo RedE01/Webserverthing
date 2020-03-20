@@ -54,4 +54,8 @@ class Model
         return result
     end
 
+    def self.getCreationTime(date)
+        return Time.at(date.to_i()).to_datetime()
+    end
+
 end

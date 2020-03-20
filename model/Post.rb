@@ -32,11 +32,17 @@ class Post < Model
         @date = date
     end
 
-    def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil)
-        queryString = "SELECT posts.*, users.name, basePost.title AS basePostTitle 
-            FROM posts INNER JOIN users ON posts.user_id = users.id
-            LEFT JOIN posts AS basePost ON posts.base_post_id = basePost.id"
+    def self.getBaseQueryString(additionalSelect: "")
+        if(additionalSelect != "")
+            additionalSelect = ", " + additionalSelect
+        end
+        return "SELECT posts.*, users.name, basePost.title AS basePostTitle #{additionalSelect}
+        FROM posts INNER JOIN users ON posts.user_id = users.id
+        LEFT JOIN posts AS basePost ON posts.base_post_id = basePost.id"
+    end
 
+    def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil)
+        queryString = getBaseQueryString()
         if(follower_id != nil)
             queryString += " INNER JOIN follows ON posts.user_id = follows.followee_id"
         end
@@ -85,8 +91,7 @@ class Post < Model
         return_array = []
         
         posts_db.each do |data|
-            creationDate = Time.at(data['date'].to_i()).to_datetime()
-            return_array << Post.new(data['id'], data['user_id'], data['title'], data['content'], data['image_name'], data['parent_post_id'], data['base_post_id'], data['depth'], data['name'], data['basePostTitle'], creationDate)
+            return_array << Post.new(data['id'], data['user_id'], data['title'], data['content'], data['image_name'], data['parent_post_id'], data['base_post_id'], data['depth'], data['name'], data['basePostTitle'], getCreationTime(data['date']))
         end
 
         return return_array

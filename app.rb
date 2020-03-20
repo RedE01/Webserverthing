@@ -1,6 +1,7 @@
 require_relative("model/Db.rb")
 require_relative("model/User.rb")
 require_relative("model/Post.rb")
+require_relative("model/Rating.rb")
 require_relative("./misc.rb")
 
 class App < Sinatra::Base
@@ -150,7 +151,14 @@ class App < Sinatra::Base
 
 	get '/user/:id' do
 		@user = User.find_by(id: params['id'])[0]
-		@userPosts = Post.find_by(user_id: params['id'])
+		@showRatingsSelected = false
+		
+		if(params['show'] == "ratings")
+			@showRatingsSelected = true;
+			@ratings = Rating.get(params['id'])
+		else
+			@userPosts = Post.find_by(user_id: params['id'])
+		end
 
 		return slim(:"user/view")
 	end

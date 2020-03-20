@@ -1,9 +1,30 @@
 h1 #{@user.name}
+form action="/user/#{@user.id}" method="get"
+    select name="show" onchange="this.form.submit();"
+        option value="posts" name="posts" Show Posts
+        - if(@showRatingsSelected)
+            option value="ratings" name="ratings" selected="" Show Ratings
+        - else
+            option value="ratings" name="ratings" Show Ratings
 hr
-h3 Posts
-- @userPosts.each do |userPost|
-    - if(userPost.depth == 0)
-        a href="/post/#{userPost.id}" Post: #{userPost.title}
-    - else
-        a href="/post/#{userPost.base_post_id}" Comment: #{userPost.content} | On Post: #{userPost.base_post_title}
-    hr
+- if(!@showRatingsSelected)
+    h3 Posts
+    - @userPosts.each do |userPost|
+        - if(userPost.depth == 0)
+            a href="/post/#{userPost.id}" Post: #{userPost.title}
+        - else
+            a href="/post/#{userPost.base_post_id}" Comment: #{userPost.content} | On Post: #{userPost.base_post_title}
+        p #{getTimeElapsedStr(userPost.date)}
+        hr
+
+- else
+    h3 Rated Posts
+    - @ratings.each do |rating|
+        - ratedPost = rating.post
+
+        - if(ratedPost.depth == 0)
+            a href="/post/#{ratedPost.id}" #{rating.getRatingString()} On post: #{ratedPost.title}
+        - else
+            a href="/post/#{ratedPost.base_post_id}" #{rating.getRatingString()} On Comment: #{ratedPost.content} | On Post: #{ratedPost.base_post_title}
+        p #{getTimeElapsedStr(ratedPost.date)}
+        hr
