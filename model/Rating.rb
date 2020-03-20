@@ -36,7 +36,7 @@ class Rating < Model
         return_array = []
         
         ratings_db.each do |data|
-            newPost = Post.new(data['id'], data['user_id'], data['title'], data['content'], data['image_name'], data['parent_post_id'], data['base_post_id'], data['depth'], data['name'], data['basePostTitle'], getCreationTime(data['date']))
+            newPost = Post.initFromDBData(data)
             return_array << Rating.new(data['user_id'], newPost, data['rating'])
         end
 
