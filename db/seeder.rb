@@ -42,7 +42,8 @@ class Seeder
                 "parent_post_id" INTEGER,
                 "base_post_id" INTEGER,
                 "depth" INTEGER NOT NULL,
-                "date" INTEGER NOT NULL
+                "date" INTEGER NOT NULL,
+                "rating" INTEGER NOT NULL
             );
         SQL
 
@@ -93,16 +94,16 @@ class Seeder
         end
 
         posts.each do |post| 
-            db.execute("INSERT INTO posts (user_id, title, content, image_name, parent_post_id, base_post_id, depth, date) VALUES(?,?,?,?,?,?,?,?)", post[:user_id], post[:title], post[:content], post[:image_name], post[:parent_post_id], post[:base_post_id], post[:depth], Time.now.to_i)
+            db.execute("INSERT INTO posts (user_id, title, content, image_name, parent_post_id, base_post_id, depth, date, rating) VALUES(?,?,?,?,?,?,?,?,?)", post[:user_id], post[:title], post[:content], post[:image_name], post[:parent_post_id], post[:base_post_id], post[:depth], Time.now.to_i, 0)
         end
 
         follows.each do |follow| 
             db.execute("INSERT INTO follows (follower_id, followee_id, date) VALUES(?, ?, ?);", follow[:follower_id], follow[:followee_id], Time.now.to_i)
         end
 
-        ratings.each do |rating|
-            db.execute("INSERT INTO ratings VALUES(?, ?, ?);", rating[:post_id], rating[:user_id], rating[:rating])
-        end
+        # ratings.each do |rating|
+        #     db.execute("INSERT INTO ratings VALUES(?, ?, ?);", rating[:post_id], rating[:user_id], rating[:rating])
+        # end
     end
 
 end

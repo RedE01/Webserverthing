@@ -1,5 +1,6 @@
 require_relative("Db.rb")
 require_relative("Model.rb")
+require_relative("Rating.rb")
 
 class CommentNode
     attr_reader :post, :children
@@ -31,6 +32,26 @@ class Post < Model
         @base_post_title = base_post_title
         @date = date
         @rating = rating
+    end
+
+    def update()
+        db = Db.get()
+        db.execute("UPDATE posts SET rating = ? WHERE id = ?;", @rating, @id) # Currently only updates rating
+    end
+
+    def rate(rating, user_id)
+        rating = rating.to_i()
+
+        if(rating > 0)
+            rating = 1
+        elsif(rating < 0)
+            rating = -1
+        end
+
+        ratingDelta = Rating.insert(@id, user_id, rating)
+
+        @rating += ratingDelta
+        update()
     end
 
     def self.getBaseQueryString(additionalSelect: "")

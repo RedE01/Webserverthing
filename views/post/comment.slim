@@ -4,6 +4,8 @@ div class="comment"
             p class="comment" #{comment.post.content}
             a href="/user/#{comment.post.user_id}" class="comment-posted-by" Posted by #{comment.post.user_name} | #{getTimeElapsedStr(comment.post.date)}
 
+            p #{comment.post.rating.to_i()}
+
             - if(session['user_id'])
                 button id="toggleCommentMoreInfo-#{comment.post.id}" onclick="toggleCommentMoreInfo(#{comment.post.id})" v
             

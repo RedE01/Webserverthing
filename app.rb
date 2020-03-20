@@ -155,7 +155,7 @@ class App < Sinatra::Base
 		
 		if(params['show'] == "ratings")
 			@showRatingsSelected = true;
-			@ratings = Rating.get(params['id'])
+			@ratings = Rating.get(user_id: params['id'])
 		else
 			@userPosts = Post.find_by(user_id: params['id'])
 		end

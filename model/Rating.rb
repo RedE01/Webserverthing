@@ -4,22 +4,15 @@ require_relative("Post.rb")
 
 class Rating < Model
     
-    attr_reader :user_id, :post, :rating
+    attr_reader :user_id, :post
+    attr_accessor :rating
 
     def initialize(user_id, post, rating)
         @user_id = user_id
         @post = post
         @rating = rating
     end
-
-    def self.get(user_id)     
-        queryString = Post.getBaseQueryString(additionalSelect: "ratings.rating")
-        queryString += " INNER JOIN ratings ON posts.id = ratings.post_id"
-        queryString += " WHERE ratings.user_id = #{user_id}"
-
-        return makeObjectArray(queryString)
-    end
-
+    
     def getRatingString()
         if(@rating > 0)
             return "+1"
@@ -27,7 +20,76 @@ class Rating < Model
         return "-1"
     end
 
+    def update()
+        db = Db.get()
+        db.execute("UPDATE ratings SET rating = ? WHERE post_id = ? AND user_id = ?;", @rating, @post.id, @user_id)
+    end
+
+    def delete()
+        db = Db.get()
+        db.execute("DELETE FROM ratings WHERE post_id = ? AND user_id = ?", @post.id, @user_id)
+    end
+
+    def self.get(post_id: nil, user_id: nil)     
+        queryString = Post.getBaseQueryString(additionalSelect: "ratings.user_id AS ratings_user_id, ratings.rating")
+        queryString += " INNER JOIN ratings ON posts.id = ratings.post_id"
+        
+        search_strings = getSearchStrings(post_id, user_id)
+        queryString += createSearchString(search_strings)
+
+        return makeObjectArray(queryString)
+    end
+
+    # Should not be used by itself as it does not increate the posts total rating counter
+    def self.insert(post_id, user_id, rating) # Returns 1 if rating increased, -1 if rating decreased and 0 if rating stayed static
+        db = Db.get()
+
+        rating = rating.to_i()
+
+        if(rating > 0)
+            rating = 1
+        elsif(rating < 0)
+            rating = -1
+        end
+        
+        existingRating = Rating.get(post_id: post_id, user_id: user_id)[0]
+        if(existingRating != nil)
+            if(existingRating.rating == rating)
+                return 0
+            end
+
+            if(rating == 0)
+                existingRating.delete()
+                return -existingRating.rating
+            end
+
+            existingRating.rating = rating
+            existingRating.update()
+
+            return rating * 2
+        end
+
+        if(rating != 0)
+            db.execute("INSERT INTO ratings VALUES (?, ?, ?);", post_id, user_id, rating.to_i())
+        end
+        return rating
+    end
+
+    def self.initFromDBData(data)
+        newPost = Post.initFromDBData(data)
+        return Rating.new(data['ratings_user_id'], newPost, data['rating'])
+    end
+
     private
+    def self.getSearchStrings(post_id, user_id)
+        search_strings = []
+
+        Rating.addStringToQuery("ratings.post_id", post_id, search_strings)
+        Rating.addStringToQuery("ratings.user_id", user_id, search_strings)
+
+        return search_strings
+    end
+
     def self.makeObjectArray(queryString)
         db = Db.get()
 
@@ -36,8 +98,7 @@ class Rating < Model
         return_array = []
         
         ratings_db.each do |data|
-            newPost = Post.initFromDBData(data)
-            return_array << Rating.new(data['user_id'], newPost, data['rating'])
+            return_array << Rating.initFromDBData(data)
         end
 
         return return_array
