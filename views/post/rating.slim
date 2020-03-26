@@ -1,0 +1,18 @@
+div class="rating"
+    - if(User.getCurrentUser() != nil)
+        - if(post.current_user_rating == 1)
+            form action="/post/rate/#{post.id}/0" method="post"
+                button type="submit" class="selectedRating" +
+        - else
+            form action="/post/rate/#{post.id}/1" method="post"
+                button type="submit" +
+
+    p   #{post.rating}  
+
+    - if(User.getCurrentUser() != nil)
+        - if(post.current_user_rating == -1)
+            form action="/post/rate/#{post.id}/0" method="post"
+                button type="submit" class="selectedRating" -
+        - else
+            form action="/post/rate/#{post.id}/-1" method="post"
+                button type="submit" -

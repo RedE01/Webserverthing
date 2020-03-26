@@ -11,9 +11,10 @@ hr
     h3 Posts
     - @userPosts.each do |userPost|
         - if(userPost.depth == 0)
-            a href="/post/#{userPost.id}" Post: #{userPost.title}
+            a href="/post/#{userPost.id}" class="postTitle" Post: #{userPost.title}
         - else
-            a href="/post/#{userPost.base_post_id}" Comment: #{userPost.content} | On Post: #{userPost.base_post_title}
+            a href="/post/#{userPost.base_post_id}" class="postTitle" Comment: #{userPost.content} | On Post: #{userPost.base_post_title}
+        == slim(:"post/rating", locals: {post: userPost })
         p #{getTimeElapsedStr(userPost.date)}
         hr
 
@@ -23,8 +24,9 @@ hr
         - ratedPost = rating.post
 
         - if(ratedPost.depth == 0)
-            a href="/post/#{ratedPost.id}" #{rating.getRatingString()} On post: #{ratedPost.title}
+            a href="/post/#{ratedPost.id}" class="postTitle" #{rating.getRatingString()} On post: #{ratedPost.title}
         - else
-            a href="/post/#{ratedPost.base_post_id}" #{rating.getRatingString()} On Comment: #{ratedPost.content} | On Post: #{ratedPost.base_post_title}
+            a href="/post/#{ratedPost.base_post_id}" class="postTitle" #{rating.getRatingString()} On Comment: #{ratedPost.content} | On Post: #{ratedPost.base_post_title}
+        == slim(:"post/rating", locals: {post: ratedPost })
         p #{getTimeElapsedStr(ratedPost.date)}
         hr

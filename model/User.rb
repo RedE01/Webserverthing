@@ -2,6 +2,7 @@ require_relative("Db.rb")
 require_relative("Model.rb")
 
 class User < Model
+    @@current_user = nil
 
     attr_reader :id, :name, :password
 
@@ -25,6 +26,14 @@ class User < Model
 
         hashedPassword = BCrypt::Password.create(password)
 		db.execute("INSERT INTO users(name, password, date) VALUES (?, ?, ?);", name, hashedPassword, Time.now().to_i())
+    end
+
+    def self.getCurrentUser()
+        return @@current_user
+    end
+
+    def self.setCurrentUser(id)
+        @@current_user = User.find_by(id: id)[0]
     end
 
     private 

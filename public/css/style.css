@@ -19,3 +19,17 @@ div.comment-content-more-info {
 img {
     width: 100%;
 }
+
+.postTitle {
+    font-size: larger;
+    text-decoration: none;
+}
+
+.rating p {
+    display: inline;
+}
+
+.selectedRating {
+    background-color: blue;
+    color: white;
+}

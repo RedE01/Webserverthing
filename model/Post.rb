@@ -17,9 +17,9 @@ end
 
 class Post < Model
 
-    attr_reader :id, :user_id, :title, :content, :image_name, :parent_post_id, :base_post_id, :depth, :user_name, :base_post_title, :date, :rating
+    attr_reader :id, :user_id, :title, :content, :image_name, :parent_post_id, :base_post_id, :depth, :user_name, :base_post_title, :date, :rating, :current_user_rating
 
-    def initialize(id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, user_name, base_post_title, date, rating)
+    def initialize(id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, user_name, base_post_title, date, rating, current_user_rating)
         @id = id
         @user_id = user_id
         @title = title
@@ -32,6 +32,7 @@ class Post < Model
         @base_post_title = base_post_title
         @date = date
         @rating = rating
+        @current_user_rating = current_user_rating
     end
 
     def update()
@@ -58,9 +59,16 @@ class Post < Model
         if(additionalSelect != "")
             additionalSelect = ", " + additionalSelect
         end
-        return "SELECT posts.*, users.name, basePost.title AS basePostTitle #{additionalSelect}
+
+        currentUserId = -1
+        if(User.getCurrentUser())
+            currentUserId = User.getCurrentUser().id
+        end
+
+        return "SELECT posts.*, users.name, basePost.title AS basePostTitle, currentUserRatings.rating AS currentUserRating #{additionalSelect}
         FROM posts INNER JOIN users ON posts.user_id = users.id
-        LEFT JOIN posts AS basePost ON posts.base_post_id = basePost.id"
+        LEFT JOIN posts AS basePost ON posts.base_post_id = basePost.id
+        LEFT JOIN ratings AS currentUserRatings ON posts.id = currentUserRatings.post_id AND currentUserRatings.user_id = #{currentUserId}"
     end
 
     def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil, rating: nil)
@@ -84,7 +92,7 @@ class Post < Model
     end
 
     def self.initFromDBData(data)
-        return Post.new(data['id'], data['user_id'], data['title'], data['content'], data['image_name'], data['parent_post_id'], data['base_post_id'], data['depth'], data['name'], data['basePostTitle'], getCreationTime(data['date']), data['rating'])
+        return Post.new(data['id'], data['user_id'], data['title'], data['content'], data['image_name'], data['parent_post_id'], data['base_post_id'], data['depth'], data['name'], data['basePostTitle'], getCreationTime(data['date']), data['rating'], data['currentUserRating'])
     end
 
     private

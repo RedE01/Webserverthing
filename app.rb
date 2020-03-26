@@ -9,26 +9,25 @@ class App < Sinatra::Base
 	enable :sessions
 	
 	before do 
-		# session['user_id'] = 1
+		session['user_id'] = 2
 
 		@db = Db.get()
 
-		@userInfo = nil
 		if(session['user_id'] != nil)
-			@userInfo = User.find_by(id: session['user_id'])[0]
+			User.setCurrentUser(session['user_id'])
 		end
 		
 	end
 
 	get '/' do
 		@posts = Post.find_by(parent_post_id: "NULL", order: [Pair.new("posts.id", "DESC")])
-
+		
 		return slim(:startpage)
 	end
-
+	
 	get '/followingPosts' do
 		@posts = Post.find_by(parent_post_id: "NULL", follower_id: session['user_id'])
-
+		
 		return slim(:followingPosts)
 	end
 	
@@ -38,13 +37,13 @@ class App < Sinatra::Base
 	
 	post '/login' do
 		user = User.find_by(name: params['username'])[0]
-
+		
 		if(user == nil)
 			return redirect('/login')
 		end
 		
 		db_hash = BCrypt::Password.new(user.password)
-
+		
 		if(db_hash == params['password'])
 			session['user_id'] = user.id
 			return redirect('/')
@@ -57,16 +56,16 @@ class App < Sinatra::Base
 		session['user_id'] = nil
 		return redirect('/')
 	end
-
+	
 	get '/user/new' do
 		return slim(:"user/new")
 	end
-
+	
 	post '/user/new' do
 		if(params['password'] != params['passwordConfirm'])
 			return redirect('/user/new')
 		end
-
+		
 		user = User.find_by(name: params['username'])[0]
 		
 		if(user != nil)
@@ -76,8 +75,19 @@ class App < Sinatra::Base
 		User.insert(params['username'], params['password'])
 		
 		#Login and stuff
-
+		
 		return redirect('/login')
+	end
+	
+	post '/post/rate/:post/:rating' do
+		if(User.getCurrentUser() == nil)
+			return redirect(back)
+		end
+
+		post = Post.find_by(id: params[:post])[0]
+		post.rate(params['rating'], User.getCurrentUser().id)
+
+		return redirect(back)
 	end
 
 	get '/post/new' do
@@ -162,4 +172,5 @@ class App < Sinatra::Base
 
 		return slim(:"user/view")
 	end
+
 end
