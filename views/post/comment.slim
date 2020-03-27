@@ -11,6 +11,9 @@ div class="comment"
                     form action="/post/#{comment.post.base_post_id}/#{comment.post.id}/#{comment.post.depth + 1}" method="post"
                         input required="" type="text" name="content"
                         button type="submit" Reply
+                    - if(User.getCurrentUser().id == comment.post.user_id && comment.post.exist != 0)
+                        form action="/post/delete/#{comment.post.id}" method="post"
+                            button type="submit" Delete Comment
                         
             == slim(:"post/rating", locals: {post: comment.post })
 

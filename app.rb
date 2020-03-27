@@ -11,22 +11,18 @@ class App < Sinatra::Base
 	before do 
 		session['user_id'] = 2
 
-		@db = Db.get()
-
-		if(session['user_id'] != nil)
-			User.setCurrentUser(session['user_id'])
-		end
+		User.setCurrentUser(session['user_id'])
 		
 	end
 
 	get '/' do
-		@posts = Post.find_by(parent_post_id: "NULL", order: [Pair.new("posts.id", "DESC")])
+		@posts = Post.find_by(parent_post_id: "NULL", exist: 1, order: [Pair.new("posts.id", "DESC")])
 		
 		return slim(:startpage)
 	end
 	
 	get '/followingPosts' do
-		@posts = Post.find_by(parent_post_id: "NULL", follower_id: session['user_id'])
+		@posts = Post.find_by(parent_post_id: "NULL", exist: 1, follower_id: session['user_id'])
 		
 		return slim(:followingPosts)
 	end
@@ -66,8 +62,6 @@ class App < Sinatra::Base
 		end
 		
 		User.insert(params['username'], params['password'])
-		
-		#Login and stuff
 		
 		return redirect('/login')
 	end
@@ -131,8 +125,27 @@ class App < Sinatra::Base
 		return redirect(back)
 	end
 
+	post '/post/delete/:id' do
+		post = Post.find_by(id: params['id'])[0]
+		if(post == nil)
+			return redirect(back)
+		end
+
+		if(post.user_id != User.getCurrentUser().id)
+			return redirect(back)
+		end
+
+		post.delete()
+
+		return redirect(back)
+	end
+
 	get '/post/:id' do
 		@post = Post.find_by(id: params['id'])[0]
+		if(@post == nil)
+			return redirect("/")
+		end
+
 		comments_list = Post.find_by(base_post_id: params['id'], order: [Pair.new("posts.depth", "ASC"), Pair.new("posts.id", "DESC")])
 
 		@comments = []
@@ -154,6 +167,9 @@ class App < Sinatra::Base
 
 	get '/user/:id' do
 		@user = User.find_by(id: params['id'])[0]
+		if(@user == nil)
+			return redirect("/")
+		end
 		@showRatingsSelected = false
 		
 		if(params['show'] == "ratings")

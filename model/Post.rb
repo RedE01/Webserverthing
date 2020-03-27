@@ -17,9 +17,9 @@ end
 
 class Post < Model
 
-    attr_reader :id, :user_id, :title, :content, :image_name, :parent_post_id, :base_post_id, :depth, :user_name, :base_post_title, :date, :rating, :current_user_rating
+    attr_reader :id, :user_id, :title, :content, :image_name, :parent_post_id, :base_post_id, :depth, :user_name, :base_post_title, :date, :rating, :current_user_rating, :exist
 
-    def initialize(id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, user_name, base_post_title, date, rating, current_user_rating)
+    def initialize(id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, user_name, base_post_title, date, rating, current_user_rating, exist)
         @id = id
         @user_id = user_id
         @title = title
@@ -33,6 +33,7 @@ class Post < Model
         @date = date
         @rating = rating
         @current_user_rating = current_user_rating
+        @exist = exist
     end
 
     def update()
@@ -55,6 +56,24 @@ class Post < Model
         update()
     end
 
+    def delete()
+        db = Db.get()
+
+        if(@image_name != nil)
+            filepath = "./public/posts/images/#{@user_id}/#{@image_name}"
+            File.delete(filepath) if File.exist?(filepath)
+        end
+
+        if(Post.find_by(parent_post_id: @id, exist: 1).length > 0)
+            db.execute("UPDATE posts SET title = '[REMOVED]', content = '[REMOVED]', exist = 0 WHERE id = ?;", @id)
+        else
+            db.execute("DELETE FROM posts WHERE posts.base_post_id = ?;", @id)
+            db.execute("DELETE FROM posts WHERE posts.id = ?;", @id)
+            db.execute("DELETE FROM ratings WHERE ratings.post_id = ?;", @id)
+        end
+
+    end
+
     def self.getBaseQueryString(additionalSelect: "")
         if(additionalSelect != "")
             additionalSelect = ", " + additionalSelect
@@ -71,13 +90,13 @@ class Post < Model
         LEFT JOIN ratings AS currentUserRatings ON posts.id = currentUserRatings.post_id AND currentUserRatings.user_id = #{currentUserId}"
     end
 
-    def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil, rating: nil)
+    def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil, rating: nil, exist: nil)
         queryString = getBaseQueryString()
         if(follower_id != nil)
             queryString += " INNER JOIN follows ON posts.user_id = follows.followee_id"
         end
 
-        search_strings = getSearchStrings(id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, follower_id, rating)
+        search_strings = getSearchStrings(id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, follower_id, rating, exist)
         
         queryString += createSearchString(search_strings)
         queryString += createOrderString(order)
@@ -88,15 +107,15 @@ class Post < Model
     def self.insert(user_id, title, content, image_name, parent_post_id, base_post_id, depth)
         db = Db.get()
 
-		db.execute("INSERT INTO posts (user_id, title, content, image_name, parent_post_id, base_post_id, depth, date, rating) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);", user_id, title, content, image_name, parent_post_id, base_post_id, depth, Time.now().to_i(), 0)
+		db.execute("INSERT INTO posts (user_id, title, content, image_name, parent_post_id, base_post_id, depth, date, rating, exist) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1);", user_id, title, content, image_name, parent_post_id, base_post_id, depth, Time.now().to_i(), 0)
     end
 
     def self.initFromDBData(data)
-        return Post.new(data['id'], data['user_id'], data['title'], data['content'], data['image_name'], data['parent_post_id'], data['base_post_id'], data['depth'], data['name'], data['basePostTitle'], getCreationTime(data['date']), data['rating'], data['currentUserRating'])
+        return Post.new(data['id'], data['user_id'], data['title'], data['content'], data['image_name'], data['parent_post_id'], data['base_post_id'], data['depth'], data['name'], data['basePostTitle'], getCreationTime(data['date']), data['rating'], data['currentUserRating'], data['exist'])
     end
 
     private
-    def self.getSearchStrings(id, user_id, title, content, image_id, parent_post_id, base_post_id, depth, follower_id, rating)
+    def self.getSearchStrings(id, user_id, title, content, image_id, parent_post_id, base_post_id, depth, follower_id, rating, exist)
         search_strings = []
 
         Post.addStringToQuery("posts.id", id, search_strings)
@@ -109,6 +128,7 @@ class Post < Model
         Post.addStringToQuery("posts.depth", depth, search_strings)
         Post.addStringToQuery("follows.follower_id", follower_id, search_strings)
         Post.addStringToQuery("posts.rating", rating, search_strings)
+        Post.addStringToQuery("posts.exist", exist, search_strings)
 
         return search_strings
     end

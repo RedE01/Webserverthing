@@ -1,5 +1,8 @@
 h1 #{@post.title}
 a href="/user/#{@post.user_id}" Posted by #{@post.user_name} | #{getTimeElapsedStr(@post.date)}
+- if(User.getCurrentUser().id == @post.user_id && @post.exist != 0)
+    form action="/post/delete/#{@post.id}" method="post"
+        button type="submit" Delete Post
 hr
 p #{@post.content}
 - if(@post.image_name)
@@ -10,7 +13,7 @@ br
 br
 hr
 h3 Comments
-- if(session['user_id'])
+- if(User.getCurrentUser())
     form action="/post/#{@post.id}/#{@post.id}/#{@post.depth + 1}" method="post"
         input required="" type="text" name="content"
         button type="submit" Reply
