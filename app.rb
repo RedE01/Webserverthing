@@ -36,24 +36,17 @@ class App < Sinatra::Base
 	end
 	
 	post '/login' do
-		user = User.find_by(name: params['username'])[0]
-		
-		if(user == nil)
-			return redirect('/login')
+		if(User.login(params['username'], params['password']))
+			session['user_id'] = User.getCurrentUser().id
+			return redirect("/")
 		end
-		
-		db_hash = BCrypt::Password.new(user.password)
-		
-		if(db_hash == params['password'])
-			session['user_id'] = user.id
-			return redirect('/')
-		end
-		
-		return redirect('/login')
+
+		return redirect("/login")
 	end
 	
 	post '/logout' do
 		session['user_id'] = nil
+		User.setCurrentUser(nil)
 		return redirect('/')
 	end
 	

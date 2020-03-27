@@ -12,6 +12,23 @@ class User < Model
         @password = password
     end
 
+    def self.login(username, password)
+        user = find_by(name: username)[0]
+		
+		if(user == nil)
+			return false
+		end
+		
+		db_hash = BCrypt::Password.new(user.password)
+		
+		if(db_hash == password)
+            setCurrentUser(user.id)
+			return true
+		end
+		
+		return false
+    end
+
     def self.find_by(id: nil, name: nil)
         search_strings = getSearchStrings(id, name)
                 
@@ -33,6 +50,11 @@ class User < Model
     end
 
     def self.setCurrentUser(id)
+        if(id == nil)
+            @@current_user = nil
+            return
+        end
+
         @@current_user = User.find_by(id: id)[0]
     end
 
