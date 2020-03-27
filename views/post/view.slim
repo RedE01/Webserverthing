@@ -11,6 +11,7 @@ p #{@post.content}
 
 br
 br
+== slim(:"post/rating", locals: {post: @post })
 hr
 h3 Comments
 - if(User.getCurrentUser())
