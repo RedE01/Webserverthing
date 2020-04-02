@@ -1,5 +1,8 @@
 hr
 - if(session['user_id'])
+    a href="/post/new" Create post
+    br
+    br
     form action="/" method="get"
         select name="show" onchange="this.form.submit();"
             option value="posts" name="posts" Show All Posts
@@ -7,6 +10,8 @@ hr
                 option value="following" name="following" selected="" Show Following Posts
             - else
                 option value="following" name="following" Show Following Posts
+
+
 h1 All Posts
 hr
 
