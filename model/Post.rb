@@ -64,7 +64,7 @@ class Post < Model
             File.delete(filepath) if File.exist?(filepath)
         end
 
-        if(Post.find_by(parent_post_id: @id, exist: 1).length > 0)
+        if(Post.where(parent_post_id: @id, exist: 1).length > 0)
             db.execute("UPDATE posts SET title = '[REMOVED]', content = '[REMOVED]', exist = 0 WHERE id = ?;", @id)
         else
             db.execute("DELETE FROM posts WHERE posts.base_post_id = ?;", @id)
@@ -90,20 +90,25 @@ class Post < Model
         LEFT JOIN ratings AS currentUserRatings ON posts.id = currentUserRatings.post_id AND currentUserRatings.user_id = #{currentUserId}"
     end
 
-    def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil, rating: nil, exist: nil, limit: nil)
+    
+    def self.where(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil, rating: nil, exist: nil, limit: nil)
         queryString = getBaseQueryString()
         if(follower_id != nil)
             queryString += " INNER JOIN follows ON posts.user_id = follows.followee_id"
         end
-
+        
         search_strings = getSearchStrings(id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, follower_id, rating, exist)
         
         queryString += createSearchString(search_strings)
         queryString += createOrderString(order)
         queryString += createLimitString(limit)
-
+        
         return makeObjectArray(queryString)
-        end
+    end
+    
+    def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, follower_id: nil, rating: nil, exist: nil)
+        return where(id: id, user_id: user_id, title: title, content: content, image_name: image_name, parent_post_id: parent_post_id, depth: depth, follower_id: follower_id, rating: rating, exist: exist, limit: 1)[0]
+    end
 
     def self.insert(user_id, title, content, image_name, parent_post_id, base_post_id, depth)
         db = Db.get()

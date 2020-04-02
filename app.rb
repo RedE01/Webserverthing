@@ -17,10 +17,10 @@ class App < Sinatra::Base
 
 	get '/' do
 		if(params['show'] == "following")
-			@posts = Post.find_by(parent_post_id: "NULL", exist: 1, follower_id: session['user_id'])
+			@posts = Post.where(parent_post_id: "NULL", exist: 1, follower_id: session['user_id'])
 			@showFollowing = true
 		else
-			@posts = Post.find_by(parent_post_id: "NULL", exist: 1, order: [Pair.new("posts.id", "DESC")])
+			@posts = Post.where(parent_post_id: "NULL", exist: 1, order: [Pair.new("posts.id", "DESC")])
 		end
 
 		return slim(:startpage)
@@ -54,7 +54,7 @@ class App < Sinatra::Base
 			return redirect('/user/new')
 		end
 		
-		user = User.find_by(name: params['username'])[0]
+		user = User.find_by(name: params['username'])
 		
 		if(user != nil)
 			return redirect('/user/new')
@@ -70,7 +70,7 @@ class App < Sinatra::Base
 			return redirect(back)
 		end
 
-		post = Post.find_by(id: params[:post])[0]
+		post = Post.find_by(id: params[:post])
 		post.rate(params['rating'], User.getCurrentUser().id)
 
 		return redirect(back)
@@ -125,7 +125,7 @@ class App < Sinatra::Base
 	end
 
 	post '/post/delete/:id' do
-		post = Post.find_by(id: params['id'])[0]
+		post = Post.find_by(id: params['id'])
 		if(post == nil)
 			return redirect(back)
 		end
@@ -140,12 +140,12 @@ class App < Sinatra::Base
 	end
 
 	get '/post/:id' do
-		@post = Post.find_by(id: params['id'])[0]
+		@post = Post.find_by(id: params['id'])
 		if(@post == nil)
 			return redirect("/")
 		end
 
-		comments_list = Post.find_by(base_post_id: params['id'], order: [Pair.new("posts.depth", "ASC"), Pair.new("posts.id", "DESC")])
+		comments_list = Post.where(base_post_id: params['id'], order: [Pair.new("posts.depth", "ASC"), Pair.new("posts.id", "DESC")])
 
 		@comments = []
 		comments_hash = Hash.new()
@@ -165,7 +165,7 @@ class App < Sinatra::Base
 	end
 
 	get '/user/:id' do
-		@user = User.find_by(id: params['id'])[0]
+		@user = User.find_by(id: params['id'])
 		if(@user == nil)
 			return redirect("/")
 		end
@@ -173,9 +173,9 @@ class App < Sinatra::Base
 		
 		if(params['show'] == "ratings")
 			@showRatingsSelected = true;
-			@ratings = Rating.get(user_id: params['id'])
+			@ratings = Rating.where(user_id: params['id'])
 		else
-			@userPosts = Post.find_by(user_id: params['id'])
+			@userPosts = Post.where(user_id: params['id'])
 		end
 
 		return slim(:"user/view")

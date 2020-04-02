@@ -30,7 +30,7 @@ class Rating < Model
         db.execute("DELETE FROM ratings WHERE post_id = ? AND user_id = ?", @post.id, @user_id)
     end
 
-    def self.get(post_id: nil, user_id: nil, order: nil, limit: nil)     
+    def self.where(post_id: nil, user_id: nil, order: nil, limit: nil)
         queryString = Post.getBaseQueryString(additionalSelect: "ratings.user_id AS ratings_user_id, ratings.rating")
         queryString += " INNER JOIN ratings ON posts.id = ratings.post_id"
         
@@ -40,6 +40,10 @@ class Rating < Model
         queryString += createLimitString(limit)
 
         return makeObjectArray(queryString)
+    end
+
+    def self.find_by(post_id: nil, user_id: nil)
+        return where(post_id: post_id, user_id: user_id, limit: 1)[0]
     end
 
     # Should not be used by itself as it does not increate the posts total rating counter
@@ -54,7 +58,7 @@ class Rating < Model
             rating = -1
         end
         
-        existingRating = Rating.get(post_id: post_id, user_id: user_id)[0]
+        existingRating = Rating.find_by(post_id: post_id, user_id: user_id)
         if(existingRating != nil)
             if(existingRating.rating == rating)
                 return 0

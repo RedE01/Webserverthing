@@ -29,7 +29,7 @@ class User < Model
 		return false
     end
 
-    def self.find_by(id: nil, name: nil, order: nil, limit: nil)
+    def self.where(id: nil, name: nil, order: nil, limit: nil)
         search_strings = getSearchStrings(id, name)
                 
         queryString = "SELECT * FROM users"
@@ -38,6 +38,10 @@ class User < Model
         queryString += createLimitString(limit)
 
         return makeObjectArray(queryString)
+    end
+
+    def self.find_by(id: nil, name: nil)
+        return where(id: id, name: name, limit: 1)[0]
     end
 
     def self.insert(name, password)
@@ -57,7 +61,7 @@ class User < Model
             return
         end
 
-        @@current_user = User.find_by(id: id)[0]
+        @@current_user = User.find_by(id: id)
     end
 
     def self.initFromDBData(data)
