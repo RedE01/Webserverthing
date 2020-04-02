@@ -58,6 +58,14 @@ class Model
         return result
     end
 
+    def self.createLimitString(limit)
+        if(!limit.is_a?(Integer))
+            return ""
+        end
+
+        return " limit #{limit}"
+    end
+
     def self.getCreationTime(date)
         return Time.at(date.to_i()).to_datetime()
     end

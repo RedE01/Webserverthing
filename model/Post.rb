@@ -90,7 +90,7 @@ class Post < Model
         LEFT JOIN ratings AS currentUserRatings ON posts.id = currentUserRatings.post_id AND currentUserRatings.user_id = #{currentUserId}"
     end
 
-    def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil, rating: nil, exist: nil)
+    def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil, rating: nil, exist: nil, limit: nil)
         queryString = getBaseQueryString()
         if(follower_id != nil)
             queryString += " INNER JOIN follows ON posts.user_id = follows.followee_id"
@@ -100,6 +100,7 @@ class Post < Model
         
         queryString += createSearchString(search_strings)
         queryString += createOrderString(order)
+        queryString += createLimitString(limit)
 
         return makeObjectArray(queryString)
         end

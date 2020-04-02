@@ -29,11 +29,13 @@ class User < Model
 		return false
     end
 
-    def self.find_by(id: nil, name: nil)
+    def self.find_by(id: nil, name: nil, order: nil, limit: nil)
         search_strings = getSearchStrings(id, name)
                 
         queryString = "SELECT * FROM users"
         queryString += createSearchString(search_strings)
+        queryString += createOrderString(order)
+        queryString += createLimitString(limit)
 
         return makeObjectArray(queryString)
     end

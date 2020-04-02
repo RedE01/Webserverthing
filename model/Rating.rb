@@ -30,12 +30,14 @@ class Rating < Model
         db.execute("DELETE FROM ratings WHERE post_id = ? AND user_id = ?", @post.id, @user_id)
     end
 
-    def self.get(post_id: nil, user_id: nil)     
+    def self.get(post_id: nil, user_id: nil, order: nil, limit: nil)     
         queryString = Post.getBaseQueryString(additionalSelect: "ratings.user_id AS ratings_user_id, ratings.rating")
         queryString += " INNER JOIN ratings ON posts.id = ratings.post_id"
         
         search_strings = getSearchStrings(post_id, user_id)
         queryString += createSearchString(search_strings)
+        queryString += createOrderString(order)
+        queryString += createLimitString(limit)
 
         return makeObjectArray(queryString)
     end
