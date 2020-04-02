@@ -89,18 +89,4 @@ class Rating < Model
 
         return search_strings
     end
-
-    def self.makeObjectArray(queryString)
-        db = Db.get()
-
-        ratings_db = db.execute(queryString)
-
-        return_array = []
-        
-        ratings_db.each do |data|
-            return_array << Rating.initFromDBData(data)
-        end
-
-        return return_array
-    end
 end

@@ -102,7 +102,7 @@ class Post < Model
         queryString += createOrderString(order)
 
         return makeObjectArray(queryString)
-    end
+        end
 
     def self.insert(user_id, title, content, image_name, parent_post_id, base_post_id, depth)
         db = Db.get()
@@ -131,20 +131,6 @@ class Post < Model
         Post.addStringToQuery("posts.exist", exist, search_strings)
 
         return search_strings
-    end
-
-    def self.makeObjectArray(queryString)
-        db = Db.get()
-
-        posts_db = db.execute(queryString)
-
-        return_array = []
-        
-        posts_db.each do |data|
-            return_array << initFromDBData(data)
-        end
-
-        return return_array
     end
 
 end

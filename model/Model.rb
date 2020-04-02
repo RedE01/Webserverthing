@@ -36,6 +36,10 @@ class Model
         return outString
     end
 
+    def self.initFromDBData(data)
+        return nil
+    end
+
     protected
     def self.createOrderString(order_pair_list)
         if(order_pair_list == nil)
@@ -56,6 +60,20 @@ class Model
 
     def self.getCreationTime(date)
         return Time.at(date.to_i()).to_datetime()
+    end
+
+    def self.makeObjectArray(queryString)
+        db = Db.get()
+
+        model_db = db.execute(queryString)
+
+        return_array = []
+        
+        model_db.each do |data|
+            return_array << initFromDBData(data)
+        end
+
+        return return_array
     end
 
 end

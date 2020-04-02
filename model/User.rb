@@ -58,6 +58,10 @@ class User < Model
         @@current_user = User.find_by(id: id)[0]
     end
 
+    def self.initFromDBData(data)
+        return User.new(data['id'], data['name'], data['password'])
+    end
+
     private 
     def self.getSearchStrings(id, name)
         search_strings = []
@@ -66,19 +70,5 @@ class User < Model
         User.addStringToQuery("users.name", name, search_strings)
 
         return search_strings
-    end
-
-    def self.makeObjectArray(queryString)
-        db = Db.get()
-
-        user_db = db.execute(queryString)
-
-        return_array = []
-
-        user_db.each do |data|
-            return_array << User.new(data['id'], data['name'], data['password'])
-        end
-
-        return return_array
     end
 end
