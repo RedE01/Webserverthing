@@ -16,15 +16,14 @@ class App < Sinatra::Base
 	end
 
 	get '/' do
-		@posts = Post.find_by(parent_post_id: "NULL", exist: 1, order: [Pair.new("posts.id", "DESC")])
-		
+		if(params['show'] == "following")
+			@posts = Post.find_by(parent_post_id: "NULL", exist: 1, follower_id: session['user_id'])
+			@showFollowing = true
+		else
+			@posts = Post.find_by(parent_post_id: "NULL", exist: 1, order: [Pair.new("posts.id", "DESC")])
+		end
+
 		return slim(:startpage)
-	end
-	
-	get '/followingPosts' do
-		@posts = Post.find_by(parent_post_id: "NULL", exist: 1, follower_id: session['user_id'])
-		
-		return slim(:followingPosts)
 	end
 	
 	get '/login' do

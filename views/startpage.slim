@@ -1,8 +1,12 @@
 hr
 - if(session['user_id'])
-    a href="/followingPosts" Follows
-    hr
-    a href="/post/new" CreatePost
+    form action="/" method="get"
+        select name="show" onchange="this.form.submit();"
+            option value="posts" name="posts" Show All Posts
+            - if(@showFollowing)
+                option value="following" name="following" selected="" Show Following Posts
+            - else
+                option value="following" name="following" Show Following Posts
 h1 All Posts
 hr
 
