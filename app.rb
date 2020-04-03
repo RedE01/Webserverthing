@@ -9,7 +9,7 @@ class App < Sinatra::Base
 	enable :sessions
 	
 	before do 
-		session['user_id'] = 2
+		# session['user_id'] = 2
 
 		User.setCurrentUser(session['user_id'])
 		
@@ -60,7 +60,7 @@ class App < Sinatra::Base
 			return redirect('/user/new')
 		end
 		
-		User.insert(params['username'], params['password'])
+		User.create(params['username'], params['password'])
 		
 		return redirect('/login')
 	end
@@ -102,7 +102,7 @@ class App < Sinatra::Base
 			image_name = filesInDir.to_s + fileExtension
 		end
 
-		Post.insert(session['user_id'], params['title'], params['content'], image_name, nil, nil, 0)
+		Post.create(session['user_id'], params['title'], params['content'], image_name, nil, nil, 0)
 
 		return redirect('/')
 	end
@@ -118,7 +118,7 @@ class App < Sinatra::Base
 		end
 
 		if(params['content'] != "")
-			Post.insert(session['user_id'], params['title'], params['content'], nil, params['parent_post_id'], params['base_post_id'], depth)
+			Post.create(session['user_id'], params['title'], params['content'], nil, params['parent_post_id'], params['base_post_id'], depth)
 		end
 
 		return redirect(back)

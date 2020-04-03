@@ -47,7 +47,7 @@ class Rating < Model
     end
 
     # Should not be used by itself as it does not increate the posts total rating counter
-    def self.insert(post_id, user_id, rating) # Returns 1 if rating increased, -1 if rating decreased and 0 if rating stayed static
+    def self.create(post_id, user_id, rating) # Returns 1 if rating increased, -1 if rating decreased and 0 if rating stayed static
         db = Db.get()
 
         rating = rating.to_i()

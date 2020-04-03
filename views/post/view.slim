@@ -1,6 +1,6 @@
 h1 #{@post.title}
 a href="/user/#{@post.user_id}" Posted by #{@post.user_name} | #{getTimeElapsedStr(@post.date)}
-- if(User.getCurrentUser().id == @post.user_id && @post.exist != 0)
+- if(User.getCurrentUser() && User.getCurrentUser().id == @post.user_id && @post.exist != 0)
     form action="/post/delete/#{@post.id}" method="post"
         button type="submit" Delete Post
 hr

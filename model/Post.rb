@@ -18,6 +18,7 @@ end
 class Post < Model
 
     attr_reader :id, :user_id, :title, :content, :image_name, :parent_post_id, :base_post_id, :depth, :user_name, :base_post_title, :date, :rating, :current_user_rating, :exist
+    attr_writer :title, :content, :image_name
 
     def initialize(id, user_id, title, content, image_name, parent_post_id, base_post_id, depth, user_name, base_post_title, date, rating, current_user_rating, exist)
         @id = id
@@ -34,6 +35,28 @@ class Post < Model
         @rating = rating
         @current_user_rating = current_user_rating
         @exist = exist
+
+        if(@user_name == nil)
+            temp = User.find_by(id: @user_id)
+            if(temp)
+                @user_name = temp.name
+            end
+        end
+
+        if(@date == nil)
+            @date = Time.now().to_datetime()
+        end
+    end
+
+    def save()
+        db = Db.get()
+
+        if(id)
+            db.execute("UPDATE posts SET user_id = ?, title = ?, content = ?, image_name = ?, parent_post_id = ?, base_post_id = ?, depth = ?, rating = ? WHERE id = ?", @user_id, @title, @content, @image_name, @parent_post_id, @base_post_id, @depth, @rating, @id)
+        else
+            db.execute("INSERT INTO posts (user_id, title, content, image_name, parent_post_id, base_post_id, depth, date, rating, exist) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1);", @user_id, @title, @content, @image_name, @parent_post_id, @base_post_id, @depth, Time.now().to_i(), @exist)
+            @id = Post.find_by(user_id: @user_id, title: @title, content: @content, image_name: @image_name, parent_post_id: @parent_post_id, base_post_id: @base_post_id, depth: @depth, exist: @exist, order: [Pair.new("posts.id", "DESC")]).id
+        end
     end
 
     def update()
@@ -50,7 +73,7 @@ class Post < Model
             rating = -1
         end
 
-        ratingDelta = Rating.insert(@id, user_id, rating)
+        ratingDelta = Rating.create(@id, user_id, rating)
 
         @rating += ratingDelta
         update()
@@ -85,7 +108,7 @@ class Post < Model
         end
 
         return "SELECT posts.*, users.name, basePost.title AS basePostTitle, currentUserRatings.rating AS currentUserRating #{additionalSelect}
-        FROM posts INNER JOIN users ON posts.user_id = users.id
+        FROM posts LEFT JOIN users ON posts.user_id = users.id
         LEFT JOIN posts AS basePost ON posts.base_post_id = basePost.id
         LEFT JOIN ratings AS currentUserRatings ON posts.id = currentUserRatings.post_id AND currentUserRatings.user_id = #{currentUserId}"
     end
@@ -106,14 +129,16 @@ class Post < Model
         return makeObjectArray(queryString)
     end
     
-    def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, follower_id: nil, rating: nil, exist: nil)
-        return where(id: id, user_id: user_id, title: title, content: content, image_name: image_name, parent_post_id: parent_post_id, depth: depth, follower_id: follower_id, rating: rating, exist: exist, limit: 1)[0]
+    def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil, rating: nil, exist: nil)
+        return where(id: id, user_id: user_id, title: title, content: content, image_name: image_name, parent_post_id: parent_post_id, depth: depth, order: order, follower_id: follower_id, rating: rating, exist: exist, limit: 1)[0]
     end
 
-    def self.insert(user_id, title, content, image_name, parent_post_id, base_post_id, depth)
+    def self.create(user_id, title, content, image_name, parent_post_id, base_post_id, depth)
         db = Db.get()
 
-		db.execute("INSERT INTO posts (user_id, title, content, image_name, parent_post_id, base_post_id, depth, date, rating, exist) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1);", user_id, title, content, image_name, parent_post_id, base_post_id, depth, Time.now().to_i(), 0)
+        post = Post.new(nil, user_id, title, content, image_name, parent_post_id, base_post_id, depth, nil, nil, nil, 0, 0, 1)
+        post.save()
+        return post
     end
 
     def self.initFromDBData(data)

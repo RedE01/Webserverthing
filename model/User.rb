@@ -12,8 +12,19 @@ class User < Model
         @password = password
     end
 
+    def save()
+        db = Db.get()
+
+        if(id)
+            db.execute("UPDATE users SET name = ?, password = ? WHERE id = ?", @name, @password, @id)
+        else
+            db.execute("INSERT INTO users(name, password, date) VALUES (?, ?, ?);", @name, @password, Time.now().to_i())
+            @id = User.find_by(name: @name).id
+        end
+    end
+
     def self.login(username, password)
-        user = find_by(name: username)[0]
+        user = find_by(name: username)
 		
 		if(user == nil)
 			return false
@@ -44,11 +55,12 @@ class User < Model
         return where(id: id, name: name, limit: 1)[0]
     end
 
-    def self.insert(name, password)
+    def self.create(name, password)
         db = Db.get()
 
         hashedPassword = BCrypt::Password.create(password)
-		db.execute("INSERT INTO users(name, password, date) VALUES (?, ?, ?);", name, hashedPassword, Time.now().to_i())
+        newUser = User.new(nil, name, hashedPassword)
+        newUser.save()
     end
 
     def self.getCurrentUser()

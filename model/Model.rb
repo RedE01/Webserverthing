@@ -1,5 +1,13 @@
 class Model
 
+    def self.all()
+        return where()
+    end
+
+    def self.first()
+        return find_by(order: [Pair.new("id", "ASC")])
+    end
+
     protected
     def self.addStringToQuery(name, val, array)
         if(val == nil)
