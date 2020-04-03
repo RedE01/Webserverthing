@@ -59,24 +59,8 @@ class Post < Model
         end
     end
 
-    def update()
-        db = Db.get()
-        db.execute("UPDATE posts SET rating = ? WHERE id = ?;", @rating, @id) # Currently only updates rating
-    end
-
-    def rate(rating, user_id)
-        rating = rating.to_i()
-
-        if(rating > 0)
-            rating = 1
-        elsif(rating < 0)
-            rating = -1
-        end
-
-        ratingDelta = Rating.create(@id, user_id, rating)
-
-        @rating += ratingDelta
-        update()
+    def rate(rating)
+        @rating += rating
     end
 
     def delete()

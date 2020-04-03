@@ -70,8 +70,7 @@ class App < Sinatra::Base
 			return redirect(back)
 		end
 
-		post = Post.find_by(id: params[:post])
-		post.rate(params['rating'], User.getCurrentUser().id)
+		Rating.create(params[:post], User.getCurrentUser().id, params['rating'])
 
 		return redirect(back)
 	end
