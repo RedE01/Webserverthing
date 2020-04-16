@@ -5,6 +5,7 @@ class Seeder
 
     def self.seed!
         db = connect
+        db.execute("PRAGMA foreign_keys = ON;")
         drop_tables(db)
         create_tables(db)
         populate_tables(db)
@@ -15,10 +16,10 @@ class Seeder
     end
 
     def self.drop_tables(db)
-        db.execute('DROP TABLE IF EXISTS users;')
-        db.execute('DROP TABLE IF EXISTS posts;')
         db.execute('DROP TABLE IF EXISTS follows;')
         db.execute('DROP TABLE IF EXISTS ratings;')
+        db.execute('DROP TABLE IF EXISTS posts;')
+        db.execute('DROP TABLE IF EXISTS users;')
     end
 
     def self.create_tables(db)
@@ -35,12 +36,12 @@ class Seeder
         db.execute <<-SQL
             CREATE TABLE "posts" (
                 "id"    INTEGER PRIMARY KEY AUTOINCREMENT,
-                "user_id" INTEGER NOT NULL,
-                "title"  TEXT,
-                "content" TEXT NOT NULL,
+                "user_id" INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                "title"  TEXT DEFAULT 'default value epic',
+                "content" TEXT NOT NULL DEFAULT 'default value also epic',
                 "image_name" TEXT,
-                "parent_post_id" INTEGER,
-                "base_post_id" INTEGER,
+                "parent_post_id" INTEGER REFERENCES posts(id) ON DELETE SET NULL,
+                "base_post_id" INTEGER REFERENCES posts(id) ON DELETE SET NULL,
                 "depth" INTEGER NOT NULL,
                 "date" INTEGER NOT NULL,
                 "rating" INTEGER NOT NULL,
@@ -50,16 +51,16 @@ class Seeder
 
         db.execute <<-SQL
             CREATE TABLE "follows" (
-                "follower_id" INTEGER NOT NULL,
-                "followee_id" INTEGER NOT NULL,
+                "follower_id" INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                "followee_id" INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 "date" INTEGER NOT NULL
             );
         SQL
 
         db.execute <<-SQL
             CREATE TABLE "ratings" (
-                "post_id" INTEGER NOT NULL,
-                "user_id" INTEGER NOT NULL,
+                "post_id" INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+                "user_id" INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 "rating" INTEGER NOT NULL
             );
         SQL
