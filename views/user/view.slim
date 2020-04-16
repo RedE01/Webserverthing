@@ -1,4 +1,11 @@
 h1 #{@user.name}
+- if(User.getCurrentUser() && User.getCurrentUser().id != @user.id)
+    - if(@isFollowing)
+        form action="/unfollow/#{User.getCurrentUser().id}/#{@user.id}" method="post"
+            button type="submit" Unfollow
+    - else
+        form action="/follow/#{User.getCurrentUser().id}/#{@user.id}" method="post"
+            button type="submit" Follow
 form action="/user/#{@user.id}" method="get"
     select name="show" onchange="this.form.submit();"
         option value="posts" name="posts" Show Posts

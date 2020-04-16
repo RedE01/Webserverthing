@@ -2,6 +2,7 @@ require_relative("model/Db.rb")
 require_relative("model/User.rb")
 require_relative("model/Post.rb")
 require_relative("model/Rating.rb")
+require_relative("model/Follow.rb")
 require_relative("./misc.rb")
 
 class App < Sinatra::Base
@@ -133,7 +134,7 @@ class App < Sinatra::Base
 			return redirect(back)
 		end
 
-		post.delete()
+		post.destroy()
 
 		return redirect(back)
 	end
@@ -168,6 +169,16 @@ class App < Sinatra::Base
 		if(@user == nil)
 			return redirect("/")
 		end
+
+		if(User.getCurrentUser() != nil)
+			@isFollowing = Follow.find_by(follower_id: User.getCurrentUser().id, followee_id: params['id'])
+			if(@isFollowing == nil)
+				@isFollowing = false
+			else
+				@isFollowing = true;
+			end
+		end
+
 		@showRatingsSelected = false
 		
 		if(params['show'] == "ratings")
@@ -178,6 +189,23 @@ class App < Sinatra::Base
 		end
 
 		return slim(:"user/view")
+	end
+
+	post '/follow/:follower/:followee' do
+		if(User.getCurrentUser() != nil)
+			Follow.create(params['follower'].to_i, params['followee'].to_i)
+		end
+		return redirect(back)
+	end
+
+	post '/unfollow/:follower/:followee' do
+		if(User.getCurrentUser() != nil && User.getCurrentUser().id == params['follower'].to_i())
+			follow = Follow.find_by(follower_id: params['follower'], followee_id: params['followee'])
+			if(follow)
+				follow.destroy()
+			end
+		end
+		return redirect(back)
 	end
 
 end

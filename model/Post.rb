@@ -63,7 +63,7 @@ class Post < Model
         @rating += rating
     end
 
-    def delete()
+    def destroy()
         db = Db.get()
 
         if(@image_name != nil)

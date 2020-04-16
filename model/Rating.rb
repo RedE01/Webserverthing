@@ -20,7 +20,7 @@ class Rating < Model
         return "-1"
     end
     
-    def delete()
+    def destroy()
         db = Db.get()
         db.execute("DELETE FROM ratings WHERE post_id = ? AND user_id = ?", @post.id, @user_id)
     end
