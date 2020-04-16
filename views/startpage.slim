@@ -18,6 +18,6 @@ hr
 - @posts.each do |post|
     a href="/post/#{post.id}" class="postTitle" #{post.title}
     br
-    a href="/user/#{post.user_id}" Posted by #{post.user_name} | #{getTimeElapsedStr(post.date)}
+    == slim(:"post/posted_by", locals: {post: post })
     == slim(:"post/rating", locals: {post: post })
     hr

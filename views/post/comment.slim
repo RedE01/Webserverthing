@@ -2,7 +2,7 @@ div class="comment"
     - comments.each do |comment|
         div class="comment-content"
             p class="comment" #{comment.post.content}
-            a href="/user/#{comment.post.user_id}" class="comment-posted-by" Posted by #{comment.post.user_name} | #{getTimeElapsedStr(comment.post.date)}
+            == slim(:"post/posted_by", locals: {post: comment.post })
 
             - if(session['user_id'])
                 button id="toggleCommentMoreInfo-#{comment.post.id}" onclick="toggleCommentMoreInfo(#{comment.post.id})" v

@@ -81,7 +81,7 @@ class App < Sinatra::Base
 	end
 	
 	post '/post' do
-		if(session['user_id'] == nil)
+		if(User.getCurrentUser() == nil)
 			return redirect('/')
 		end
 		
@@ -108,7 +108,7 @@ class App < Sinatra::Base
 	end
 
 	post '/post/:base_post_id/:parent_post_id/:depth' do
-		if(session['user_id'] == nil)
+		if(User.getCurrentUser()== nil)
 			return redirect('/')
 		end
 
@@ -130,11 +130,9 @@ class App < Sinatra::Base
 			return redirect(back)
 		end
 
-		if(post.user_id != User.getCurrentUser().id)
-			return redirect(back)
+		if(User.getCurrentUser() && post.user_id == User.getCurrentUser().id)
+			post.destroy()
 		end
-
-		post.destroy()
 
 		return redirect(back)
 	end
@@ -192,7 +190,7 @@ class App < Sinatra::Base
 	end
 
 	post '/follow/:follower/:followee' do
-		if(User.getCurrentUser() != nil)
+		if(User.getCurrentUser() != nil && User.getCurrentUser().id == params['follower'].to_i())
 			Follow.create(params['follower'].to_i, params['followee'].to_i)
 		end
 		return redirect(back)
@@ -206,6 +204,16 @@ class App < Sinatra::Base
 			end
 		end
 		return redirect(back)
+	end
+
+	post '/user/delete/:id' do
+		if(User.getCurrentUser() != nil && User.getCurrentUser().id == params['id'].to_i())
+			p "DELETING USER EPICLY"
+			User.getCurrentUser().destroy();
+			session['user_id'] = nil
+			User.setCurrentUser(nil)
+		end
+		return redirect("/")
 	end
 
 end

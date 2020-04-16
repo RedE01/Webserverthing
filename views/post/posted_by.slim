@@ -1,0 +1,4 @@
+- if(post.user_name)
+    a href="/user/#{post.user_id}" Posted by #{post.user_name} | #{getTimeElapsedStr(post.date)}
+- else
+    p Posted by DELETED USER | #{getTimeElapsedStr(post.date)}

@@ -23,6 +23,12 @@ class User < Model
         end
     end
 
+    def destroy()
+        db = Db.get()
+
+        db.execute("DELETE FROM users WHERE users.id = ?;", @id)
+    end
+
     def self.login(username, password)
         user = find_by(name: username)
 		
