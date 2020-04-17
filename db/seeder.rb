@@ -36,7 +36,7 @@ class Seeder
         db.execute <<-SQL
             CREATE TABLE "posts" (
                 "id"    INTEGER PRIMARY KEY AUTOINCREMENT,
-                "user_id" INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                "user_id" INTEGER,
                 "title"  TEXT DEFAULT 'default value epic',
                 "content" TEXT NOT NULL DEFAULT 'default value also epic',
                 "image_name" TEXT,
