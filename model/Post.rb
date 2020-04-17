@@ -81,25 +81,24 @@ class Post < Model
 
     end
 
-    def self.getBaseQueryString(additionalSelect: "")
+    def self.getBaseQueryString(current_user_id, additionalSelect: "")
         if(additionalSelect != "")
             additionalSelect = ", " + additionalSelect
         end
 
-        currentUserId = -1
-        if(User.getCurrentUser())
-            currentUserId = User.getCurrentUser().id
+        if(current_user_id == nil)
+            current_user_id = -1;
         end
 
         return "SELECT posts.*, users.name, basePost.title AS basePostTitle, currentUserRatings.rating AS currentUserRating #{additionalSelect}
         FROM posts LEFT JOIN users ON posts.user_id = users.id
         LEFT JOIN posts AS basePost ON posts.base_post_id = basePost.id
-        LEFT JOIN ratings AS currentUserRatings ON posts.id = currentUserRatings.post_id AND currentUserRatings.user_id = #{currentUserId}"
+        LEFT JOIN ratings AS currentUserRatings ON posts.id = currentUserRatings.post_id AND currentUserRatings.user_id = #{current_user_id}"
     end
 
     
-    def self.where(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil, rating: nil, exist: nil, limit: nil)
-        queryString = getBaseQueryString()
+    def self.where(current_user_id: nil, id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil, rating: nil, exist: nil, limit: nil)
+        queryString = getBaseQueryString(current_user_id)
         if(follower_id != nil)
             queryString += " INNER JOIN follows ON posts.user_id = follows.followee_id"
         end
@@ -113,8 +112,8 @@ class Post < Model
         return makeObjectArray(queryString)
     end
     
-    def self.find_by(id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil, rating: nil, exist: nil)
-        return where(id: id, user_id: user_id, title: title, content: content, image_name: image_name, parent_post_id: parent_post_id, depth: depth, order: order, follower_id: follower_id, rating: rating, exist: exist, limit: 1)[0]
+    def self.find_by(current_user_id: nil, id: nil, user_id: nil, title: nil, content: nil, image_name: nil, parent_post_id: nil, base_post_id: nil, depth: nil, order: nil, follower_id: nil, rating: nil, exist: nil)
+        return where(current_user_id: current_user_id, id: id, user_id: user_id, title: title, content: content, image_name: image_name, parent_post_id: parent_post_id, depth: depth, order: order, follower_id: follower_id, rating: rating, exist: exist, limit: 1)[0]
     end
 
     def self.create(user_id, title, content, image_name, parent_post_id, base_post_id, depth)

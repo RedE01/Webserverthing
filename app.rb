@@ -4,24 +4,26 @@ require_relative("model/Post.rb")
 require_relative("model/Rating.rb")
 require_relative("model/Follow.rb")
 require_relative("./misc.rb")
+require_relative("./login_handler.rb")
 
 class App < Sinatra::Base
 	
 	enable :sessions
 	
 	before do 
-		# session['user_id'] = 2
-
-		User.setCurrentUser(session['user_id'])
-		
+		if(session[:user_id] == nil)
+			@current_user = nil
+		else
+			@current_user = User.find_by(id: session[:user_id])
+		end
 	end
 
 	get '/' do
 		if(params['show'] == "following")
-			@posts = Post.where(parent_post_id: "NULL", exist: 1, follower_id: session['user_id'])
+			@posts = Post.where(current_user_id: session[:user_id], parent_post_id: "NULL", exist: 1, follower_id: session[:user_id])
 			@showFollowing = true
 		else
-			@posts = Post.where(parent_post_id: "NULL", exist: 1, order: [Pair.new("posts.id", "DESC")])
+			@posts = Post.where(current_user_id: session[:user_id], parent_post_id: "NULL", exist: 1, order: [Pair.new("posts.id", "DESC")])
 		end
 
 		return slim(:startpage)
@@ -32,8 +34,10 @@ class App < Sinatra::Base
 	end
 	
 	post '/login' do
-		if(User.login(params['username'], params['password']))
-			session['user_id'] = User.getCurrentUser().id
+		user = LoginHandler.login(params['username'], params['password'])
+		if(user)
+			session.clear()
+			session[:user_id] = user.id
 			return redirect("/")
 		end
 
@@ -41,8 +45,7 @@ class App < Sinatra::Base
 	end
 	
 	post '/logout' do
-		session['user_id'] = nil
-		User.setCurrentUser(nil)
+		session[:user_id] = nil
 		return redirect('/')
 	end
 	
@@ -67,11 +70,11 @@ class App < Sinatra::Base
 	end
 	
 	post '/post/rate/:post/:rating' do
-		if(User.getCurrentUser() == nil)
+		if(@current_user == nil)
 			return redirect(back)
 		end
 
-		Rating.create(params[:post], User.getCurrentUser().id, params['rating'])
+		Rating.create(params[:post], @current_user.id, params['rating'])
 
 		return redirect(back)
 	end
@@ -81,7 +84,7 @@ class App < Sinatra::Base
 	end
 	
 	post '/post' do
-		if(User.getCurrentUser() == nil)
+		if(@current_user == nil)
 			return redirect('/')
 		end
 		
@@ -89,7 +92,7 @@ class App < Sinatra::Base
 		if(params[:image])
 			tempFile = params[:image][:tempfile]
 
-			dirname = "./public/posts/images/#{session['user_id']}"
+			dirname = "./public/posts/images/#{session[:user_id]}"
 			unless File.directory?(dirname)
 				FileUtils.mkdir_p(dirname)
 			end
@@ -102,13 +105,13 @@ class App < Sinatra::Base
 			image_name = filesInDir.to_s + fileExtension
 		end
 
-		Post.create(session['user_id'], params['title'], params['content'], image_name, nil, nil, 0)
+		Post.create(session[:user_id], params['title'], params['content'], image_name, nil, nil, 0)
 
 		return redirect('/')
 	end
 
 	post '/post/:base_post_id/:parent_post_id/:depth' do
-		if(User.getCurrentUser()== nil)
+		if(@current_user== nil)
 			return redirect('/')
 		end
 
@@ -118,7 +121,7 @@ class App < Sinatra::Base
 		end
 
 		if(params['content'] != "")
-			Post.create(session['user_id'], params['title'], params['content'], nil, params['parent_post_id'], params['base_post_id'], depth)
+			Post.create(session[:user_id], params['title'], params['content'], nil, params['parent_post_id'], params['base_post_id'], depth)
 		end
 
 		return redirect(back)
@@ -130,7 +133,7 @@ class App < Sinatra::Base
 			return redirect(back)
 		end
 
-		if(User.getCurrentUser() && post.user_id == User.getCurrentUser().id)
+		if(@current_user && post.user_id == @current_user.id)
 			post.destroy()
 		end
 
@@ -138,12 +141,12 @@ class App < Sinatra::Base
 	end
 
 	get '/post/:id' do
-		@post = Post.find_by(id: params['id'])
+		@post = Post.find_by(current_user_id: session[:user_id], id: params['id'])
 		if(@post == nil)
 			return redirect("/")
 		end
 
-		comments_list = Post.where(base_post_id: params['id'], order: [Pair.new("posts.depth", "ASC"), Pair.new("posts.id", "DESC")])
+		comments_list = Post.where(current_user_id: session[:user_id], base_post_id: params['id'], order: [Pair.new("posts.depth", "ASC"), Pair.new("posts.id", "DESC")])
 
 		@comments = []
 		comments_hash = Hash.new()
@@ -168,8 +171,8 @@ class App < Sinatra::Base
 			return redirect("/")
 		end
 
-		if(User.getCurrentUser() != nil)
-			@isFollowing = Follow.find_by(follower_id: User.getCurrentUser().id, followee_id: params['id'])
+		if(@current_user != nil)
+			@isFollowing = Follow.find_by(follower_id: @current_user.id, followee_id: params['id'])
 			if(@isFollowing == nil)
 				@isFollowing = false
 			else
@@ -181,23 +184,23 @@ class App < Sinatra::Base
 		
 		if(params['show'] == "ratings")
 			@showRatingsSelected = true;
-			@ratings = Rating.where(user_id: params['id'])
+			@ratings = Rating.where(current_user_id: session[:user_id], user_id: params['id'])
 		else
-			@userPosts = Post.where(user_id: params['id'])
+			@userPosts = Post.where(current_user_id: session[:user_id], user_id: params['id'])
 		end
 
 		return slim(:"user/view")
 	end
 
 	post '/follow/:follower/:followee' do
-		if(User.getCurrentUser() != nil && User.getCurrentUser().id == params['follower'].to_i())
+		if(@current_user != nil && @current_user.id == params['follower'].to_i())
 			Follow.create(params['follower'].to_i, params['followee'].to_i)
 		end
 		return redirect(back)
 	end
 
 	post '/unfollow/:follower/:followee' do
-		if(User.getCurrentUser() != nil && User.getCurrentUser().id == params['follower'].to_i())
+		if(@current_user != nil && @current_user.id == params['follower'].to_i())
 			follow = Follow.find_by(follower_id: params['follower'], followee_id: params['followee'])
 			if(follow)
 				follow.destroy()
@@ -207,11 +210,9 @@ class App < Sinatra::Base
 	end
 
 	post '/user/delete/:id' do
-		if(User.getCurrentUser() != nil && User.getCurrentUser().id == params['id'].to_i())
-			p "DELETING USER EPICLY"
-			User.getCurrentUser().destroy();
-			session['user_id'] = nil
-			User.setCurrentUser(nil)
+		if(@current_user != nil && @current_user.id == params['id'].to_i())
+			@current_user.destroy();
+			session[:user_id] = nil
 		end
 		return redirect("/")
 	end

@@ -2,8 +2,6 @@ require_relative("Db.rb")
 require_relative("Model.rb")
 
 class User < Model
-    @@current_user = nil
-
     attr_reader :id, :name, :password
 
     def initialize(id, name, password)
@@ -29,23 +27,6 @@ class User < Model
         db.execute("DELETE FROM users WHERE users.id = ?;", @id)
     end
 
-    def self.login(username, password)
-        user = find_by(name: username)
-		
-		if(user == nil)
-			return false
-		end
-		
-		db_hash = BCrypt::Password.new(user.password)
-		
-		if(db_hash == password)
-            setCurrentUser(user.id)
-			return true
-		end
-		
-		return false
-    end
-
     def self.where(id: nil, name: nil, order: nil, limit: nil)
         search_strings = getSearchStrings(id, name)
                 
@@ -64,22 +45,13 @@ class User < Model
     def self.create(name, password)
         db = Db.get()
 
-        hashedPassword = BCrypt::Password.create(password)
-        newUser = User.new(nil, name, hashedPassword)
-        newUser.save()
-    end
-
-    def self.getCurrentUser()
-        return @@current_user
-    end
-
-    def self.setCurrentUser(id)
-        if(id == nil)
-            @@current_user = nil
+        if(find_by(name: name) != nil)
             return
         end
 
-        @@current_user = User.find_by(id: id)
+        hashedPassword = BCrypt::Password.create(password)
+        newUser = User.new(nil, name, hashedPassword)
+        newUser.save()
     end
 
     def self.initFromDBData(data)

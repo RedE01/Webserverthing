@@ -6,8 +6,8 @@ html
         script src="/js/javascript.js"
     body
         a href="/" Home
-        -if(User.getCurrentUser())
-            h3 Logged in as #{User.getCurrentUser().name}
+        -if(@current_user)
+            h3 Logged in as #{@current_user.name}
             form action="/logout" method="post"
                 input type="submit" value="logout"
         - else

@@ -1,5 +1,5 @@
 div class="rating"
-    - if(User.getCurrentUser() != nil)
+    - if(@current_user != nil)
         - if(post.current_user_rating == 1)
             form action="/post/rate/#{post.id}/0" method="post"
                 button type="submit" class="selectedRating" +
@@ -9,7 +9,7 @@ div class="rating"
 
     p   #{post.rating}  
 
-    - if(User.getCurrentUser() != nil)
+    - if(@current_user != nil)
         - if(post.current_user_rating == -1)
             form action="/post/rate/#{post.id}/0" method="post"
                 button type="submit" class="selectedRating" -

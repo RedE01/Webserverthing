@@ -1,6 +1,6 @@
 h1 #{@post.title}
 == slim(:"post/posted_by", locals: {post: @post })
-- if(User.getCurrentUser() && User.getCurrentUser().id == @post.user_id && @post.exist != 0)
+- if(@current_user && @current_user.id == @post.user_id && @post.exist != 0)
     form action="/post/delete/#{@post.id}" method="post"
         button type="submit" Delete Post
 hr
@@ -14,7 +14,7 @@ br
 == slim(:"post/rating", locals: {post: @post })
 hr
 h3 Comments
-- if(User.getCurrentUser())
+- if(@current_user)
     form action="/post/#{@post.id}/#{@post.id}/#{@post.depth + 1}" method="post"
         input required="" type="text" name="content"
         button type="submit" Reply

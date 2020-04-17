@@ -34,8 +34,8 @@ class Rating < Model
         end
     end
 
-    def self.where(post_id: nil, user_id: nil, order: nil, limit: nil)
-        queryString = Post.getBaseQueryString(additionalSelect: "ratings.user_id AS ratings_user_id, ratings.rating AS rating_rating")
+    def self.where(current_user_id: nil, post_id: nil, user_id: nil, order: nil, limit: nil)
+        queryString = Post.getBaseQueryString(current_user_id, additionalSelect: "ratings.user_id AS ratings_user_id, ratings.rating AS rating_rating")
         queryString += " INNER JOIN ratings ON posts.id = ratings.post_id"
         
         search_strings = getSearchStrings(post_id, user_id)
