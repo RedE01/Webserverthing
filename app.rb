@@ -26,7 +26,7 @@ class App < Sinatra::Base
 			@posts = Post.where(current_user_id: session[:user_id], parent_post_id: "NULL", exist: 1, order: [Pair.new("posts.id", "DESC")])
 		end
 
-		return slim(:startpage)
+		return slim(:index)
 	end
 	
 	get '/login' do
