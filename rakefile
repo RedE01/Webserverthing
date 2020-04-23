@@ -8,3 +8,19 @@ task :debug do
   sh 'rackup'
 end
   
+namespace :test do
+  task :acceptance do
+    system("ruby db/seeder.rb")
+    tests = get_tests_sorted('./spec/acceptance/*_spec.rb')
+    tests.each do |test|
+      system("bundle exec 'ruby #{test}'")
+    end
+  end
+
+  def get_tests_sorted(path)
+    tests = Dir.glob(path).sort_by do |a|
+      File.basename(a).split("_").first.to_i
+    end
+    return tests
+  end
+end
