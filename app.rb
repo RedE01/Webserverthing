@@ -34,18 +34,15 @@ class App < Sinatra::Base
 	end
 	
 	post '/login' do
-		user = LoginHandler.login(params['username'], params['password'])
-		if(user)
-			session.clear()
-			session[:user_id] = user.id
-			return redirect("/")
+		if(LoginHandler.login(params['username'], params['password'], session))
+			redirect("/")
 		end
 
 		return redirect("/login")
 	end
 	
 	post '/logout' do
-		session[:user_id] = nil
+		session.clear()
 		return redirect('/')
 	end
 	
