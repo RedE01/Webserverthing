@@ -54,7 +54,7 @@ class Post < Model
         if(id)
             db.execute("UPDATE posts SET user_id = ?, title = ?, content = ?, image_name = ?, parent_post_id = ?, base_post_id = ?, depth = ?, rating = ? WHERE id = ?", @user_id, @title, @content, @image_name, @parent_post_id, @base_post_id, @depth, @rating, @id)
         else
-            db.execute("INSERT INTO posts (user_id, title, content, image_name, parent_post_id, base_post_id, depth, date, rating, exist) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1);", @user_id, @title, @content, @image_name, @parent_post_id, @base_post_id, @depth, Time.now().to_i(), @exist)
+            db.execute("INSERT INTO posts (user_id, title, content, image_name, parent_post_id, base_post_id, depth, date, rating, exist) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1);", @user_id, @title, @content, @image_name, @parent_post_id, @base_post_id, @depth, Time.now().to_i(), @rating)
             @id = Post.find_by(user_id: @user_id, title: @title, content: @content, image_name: @image_name, parent_post_id: @parent_post_id, base_post_id: @base_post_id, depth: @depth, exist: @exist, order: [Pair.new("posts.id", "DESC")]).id
         end
     end
