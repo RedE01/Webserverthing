@@ -34,7 +34,7 @@ class App < Sinatra::Base
 	end
 	
 	post '/login' do
-		if(LoginHandler.login(params['username'], params['password'], session))
+		if(LoginHandler.login(params['username'], params['password'], session, request.ip))
 			redirect("/")
 		end
 

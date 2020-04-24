@@ -9,6 +9,16 @@ class Seeder
         drop_tables(db)
         create_tables(db)
         populate_tables(db)
+
+        db2 = SQLite3::Database.new("db/login_log.db")
+        db2.execute("DROP TABLE IF EXISTS login_attempts;")
+        db2.execute <<-SQL
+        CREATE TABLE "login_attempts" (
+            "ip"    TEXT NOT NULL,
+            "user_id"  INTEGER,
+            "date" INTEGER NOT NULL
+        );
+        SQL
     end
 
     def self.connect
