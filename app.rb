@@ -10,6 +10,10 @@ class App < Sinatra::Base
 	
 	enable :sessions
 	
+	# Public: Before block, called before each route. Updates @current_user to the 
+	# currently logged in user.
+	#
+	# Returns nothing
 	before do 
 		if(session[:user_id] == nil)
 			@current_user = nil
@@ -18,6 +22,10 @@ class App < Sinatra::Base
 		end
 	end
 
+	# Public: Index page, show all posts. If 'show following posts' only the posts
+	# from people you follow are shown.
+	#
+	# Returns redirect to views/index.slim
 	get '/' do
 		if(params['show'] == "following")
 			@posts = Post.where(current_user_id: session[:user_id], parent_post_id: "NULL", exist: 1, follower_id: session[:user_id])
@@ -29,10 +37,17 @@ class App < Sinatra::Base
 		return slim(:index)
 	end
 	
+	# Public: Shows login screen
 	get '/login' do
 		return slim(:login)
 	end
 	
+	# Public: Check credentials and, if succesfull, logs into user.
+	#
+	# params['username'] - Taken from textfield 'username' in form in login.slim.
+	# params['password'] - Taken from textfield 'password' in form in login.slim.
+	#
+	# Returns redirect to index page if succesfull, redirects back to /login if not.
 	post '/login' do
 		if(LoginHandler.login(params['username'], params['password'], session, request.ip))
 			redirect("/")
@@ -40,16 +55,25 @@ class App < Sinatra::Base
 
 		return redirect("/login")
 	end
-	
+
+	# Public: Logs out of currenly logged in user
 	post '/logout' do
 		session.clear()
 		return redirect('/')
 	end
 	
+	# Public: Shows user creation page
 	get '/user/new' do
 		return slim(:"user/new")
 	end
 	
+	# Public: Creates new user with provided parameters
+	#
+	# params['password'] - Taken from textfield 'password' in form in user/new.slim.
+	# params['passwordConfirm'] - Taken from textfield 'passwordConfirm' in form in user/new.slim.
+	# params['username'] - Taken from textfield 'username' in form in user/new.slim.
+	#
+	# Returns redirect to /login if succesful, /user/new otherwise
 	post '/user/new' do
 		if(params['password'] != params['passwordConfirm'])
 			return redirect('/user/new')
@@ -66,6 +90,12 @@ class App < Sinatra::Base
 		return redirect('/login')
 	end
 	
+	# Public: Adds a rating to a post.
+	#
+	# params[:post] - The id of the post to be rated.
+	# params[:rating] - THe rating that should be applied to the post.
+	#
+	# Returns redirect back
 	post '/post/rate/:post/:rating' do
 		if(@current_user == nil)
 			return redirect(back)
@@ -76,10 +106,19 @@ class App < Sinatra::Base
 		return redirect(back)
 	end
 
+	# Public: Shows the 'create post' page
 	get '/post/new' do
 		return slim(:"post/new")
 	end
 	
+	# Public: Creates a post if client is logged in, copies over an image to its appropriate 
+	# folder, if one was provided.
+	#
+	# params[:image] - The image data provided. Taken from file field 'image' in form in post/new.slim.
+	# params[:title] - The title of the post. Taken from textfield 'title' in form in post/new.slim.
+	# params[:content] - The content of the post. Taken from textfield 'content' in form in post/new.slim.
+	#
+	# Returns redirect to index page
 	post '/post' do
 		if(@current_user == nil)
 			return redirect('/')
@@ -107,6 +146,13 @@ class App < Sinatra::Base
 		return redirect('/')
 	end
 
+	# Public: Creates a comment post
+	#
+	# params[:base_post_id] - The id of the post highest up in the post chain hierarchy
+	# params[:parent_post_id] - The id of the post directly above the new post in the post chain hierarchy.
+	# params[:depth] - The depth(how far down the post is in the post chain hierarchy).
+	# params[:title] - The title of the post. Taken from textfield 'title' in form in post/view.slim.
+	# params[:content] - The content of the post. Taken from textfield 'content' in form in post/view.slim.
 	post '/post/:base_post_id/:parent_post_id/:depth' do
 		if(@current_user== nil)
 			return redirect('/')
@@ -124,6 +170,9 @@ class App < Sinatra::Base
 		return redirect(back)
 	end
 
+	# Public: Delete post with id if the post was created by the currenly logged in to user.
+	#
+	# params[:id] - The id of the post to be deleted
 	post '/post/delete/:id' do
 		post = Post.find_by(id: params['id'])
 		if(post == nil)
@@ -137,6 +186,9 @@ class App < Sinatra::Base
 		return redirect(back)
 	end
 
+	# Public: Show a post and all its comments.
+	#
+	# params[:id] - The id of the post to be displayed.
 	get '/post/:id' do
 		@post = Post.find_by(current_user_id: session[:user_id], id: params['id'])
 		if(@post == nil)
@@ -162,6 +214,11 @@ class App < Sinatra::Base
 		return slim(:"post/view")
 	end
 
+	# Public: Show a user page, if params['show'] == "ratings", show all posts that the user has rated.
+	# Otherwise, show the posts the user has created
+	#
+	# params[:id] - The id of the user.
+	# params['show'] - If == "ratings" show ratings, otherwise show posts created by user
 	get '/user/:id' do
 		@user = User.find_by(id: params['id'])
 		if(@user == nil)
@@ -189,6 +246,10 @@ class App < Sinatra::Base
 		return slim(:"user/view")
 	end
 
+	# Public: Create a follower relation between two users if the follower is the currently logged in to user.
+	#
+	# params[:follower] - The user that should follower the followee.
+	# params[:followee] - The user that should be followed.
 	post '/follow/:follower/:followee' do
 		if(@current_user != nil && @current_user.id == params['follower'].to_i())
 			Follow.create(params['follower'].to_i, params['followee'].to_i)
@@ -196,6 +257,10 @@ class App < Sinatra::Base
 		return redirect(back)
 	end
 
+	# Public: Remove a follower relation between two users if the follower is the currently logged in to user.
+	#
+	# params[:follower] - The user that was following the followee.
+	# params[:followee] - The user that was followed.
 	post '/unfollow/:follower/:followee' do
 		if(@current_user != nil && @current_user.id == params['follower'].to_i())
 			follow = Follow.find_by(follower_id: params['follower'], followee_id: params['followee'])
@@ -206,6 +271,9 @@ class App < Sinatra::Base
 		return redirect(back)
 	end
 
+	# Public: Delete a user.
+	#
+	# params[:id] - The id of the user to be deleted
 	post '/user/delete/:id' do
 		if(@current_user != nil && @current_user.id == params['id'].to_i())
 			@current_user.destroy();
