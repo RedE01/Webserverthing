@@ -1,6 +1,8 @@
 require_relative("Db.rb")
 require_relative("Model.rb")
 
+# Takes care of interactions between the webserver and the database for User objects. The user objects 
+# can be logged into, to allow certain actions like creating and rating posts
 class User < Model
     attr_reader :id, :name, :password
 

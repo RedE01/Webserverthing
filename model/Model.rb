@@ -1,3 +1,5 @@
+# The base class on which the other model classes buils from. The model classes are used when interacting
+# with the database as an abstraction layer between the webserver and the database.
 class Model
 
     # Public: Returns all objects in database of the same type as the derived class it is called from.

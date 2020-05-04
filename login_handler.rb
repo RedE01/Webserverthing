@@ -1,6 +1,7 @@
 require_relative 'model/Db.rb'
 require_relative 'model/User.rb'
 
+# Handles login, login cooldown, and storing login attempts into a separate database
 class LoginHandler
 
     def initialize()

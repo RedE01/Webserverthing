@@ -1,6 +1,8 @@
 require_relative("Db.rb")
 require_relative("Model.rb")
 
+# Takes care of interactions between the webserver and the database for Follow objects. The follow objects
+# describe a many to many to many relation between users where one user if following another user.
 class Follow < Model
     attr_reader :follower_id, :followee_id, :date
 

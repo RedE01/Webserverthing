@@ -6,6 +6,7 @@ require_relative("model/Follow.rb")
 require_relative("./misc.rb")
 require_relative("./login_handler.rb")
 
+# Where the routes are defined and settings are configured
 class App < Sinatra::Base
 	
 	enable :sessions

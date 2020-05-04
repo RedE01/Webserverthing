@@ -2,6 +2,8 @@ require_relative("Db.rb")
 require_relative("Model.rb")
 require_relative("Post.rb")
 
+# Takes care of interactions between the webserver and the database for Rating objects. The Rating objects
+# keep track of a rating made on a post by a user, and what that rating was. The rating can either be 1 or -1
 class Rating < Model
     
     attr_reader :user_id, :post

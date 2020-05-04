@@ -1,3 +1,4 @@
+# Simple class that stores two variables
 class Pair
     attr_reader :var1, :var2
 
@@ -7,6 +8,7 @@ class Pair
     end
 end
 
+# Returns a string that that shows the time since a certain time point in a human readable format.
 def getTimeElapsedStr(startTime)
     time_diff = (Time.now().to_i() - startTime.to_time().to_i())
 

@@ -1,3 +1,4 @@
+# Configures the database and acts as an abstraction between the SQLite3 wherever the database is needed. 
 class Db
 
     #   Public: Gets the SQLite3::Database object

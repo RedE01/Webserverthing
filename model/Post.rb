@@ -2,6 +2,8 @@ require_relative("Db.rb")
 require_relative("Model.rb")
 require_relative("Rating.rb")
 
+# Used for structuring comments in a multi-linked list so that they can easily be retrieved and
+# displayed in their correct order 
 class CommentNode
     attr_reader :post, :children
 
@@ -15,6 +17,8 @@ class CommentNode
     end
 end
 
+# Takes care of interactions between the webserver and the database for Post objects. Post objects contain a title, content
+# and optionally an image. Posts can be created, rated and commented on by users.
 class Post < Model
 
     attr_reader :id, :user_id, :title, :content, :image_name, :parent_post_id, :base_post_id, :depth, :user_name, :base_post_title, :date, :rating, :current_user_rating, :exist

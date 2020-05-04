@@ -1,6 +1,7 @@
 require 'sqlite3'
 require 'bcrypt'
 
+# Resets the databases to their default values - useful for testing
 class Seeder
 
     def self.seed!
